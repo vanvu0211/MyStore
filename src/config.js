@@ -1,0 +1,1 @@
+export const API_URL = 'http://hcmut3.runasp.net/api';
