@@ -1,1 +1,1 @@
-export const API_URL = 'https://hcmut.runasp.net/api';
+export const API_URL = 'https://hcmut4.runasp.net/api';

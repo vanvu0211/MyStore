@@ -179,30 +179,24 @@ function SaleManager() {
 
       {/* Printable Invoice Section */}
       {invoiceData && (
-        <div style={{ display: 'none' }}>
+        <div className="hidden print:block">
           <div
             ref={componentRef}
-            style={{
-              width: '72mm',
-              padding: '5mm',
-              fontSize: '12px',
-              fontFamily: 'Arial, sans-serif',
-              backgroundColor: 'white',
-              color: 'black',
-            }}
+            className="w-72 p-5 text-xs font-sans bg-white text-black"
+            style={{ width: '72mm', padding: '5mm' }}
           >
             {/* Header */}
-            <div style={{ textAlign: 'center', marginBottom: '10px' }}>
-              <div style={{ fontWeight: 'bold', fontSize: '14px' }}>Tạp hóa Văn Bằng</div>
-              <div style={{ fontSize: '10px', lineHeight: '1.2' }}>
-                0352790655 - Thôn 5, Quảng Tín, Đắk R Lấp
+            <div className="text-center mb-2.5">
+              <div className="font-bold text-sm">Tạp hóa Văn Bằng</div>
+              <div className="text-10 leading-tight">
+                0966900544 - Thôn 5, Quảng Tín, Đắk R Lấp
               </div>
             </div>
 
             {/* Invoice Title */}
-            <div style={{ textAlign: 'center', margin: '10px 0' }}>
-              <div style={{ fontWeight: 'bold', fontSize: '13px' }}>HÓA ĐƠN TẠM TÍNH</div>
-              <div style={{ fontSize: '10px' }}>
+            <div className="text-center my-2.5">
+              <div className="font-bold text-13">HÓA ĐƠN TẠM TÍNH</div>
+              <div className="text-10">
                 {new Date().toLocaleDateString('vi-VN', {
                   day: '2-digit',
                   month: '2-digit',
@@ -214,31 +208,31 @@ function SaleManager() {
             </div>
 
             {/* Customer */}
-            <div style={{ marginBottom: '8px', fontSize: '10px' }}>
+            <div className="mb-2 text-10">
               <strong>Khách:</strong> {invoiceData.customerName}
             </div>
 
             {/* Products Table */}
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '10px', marginBottom: '8px' }}>
+            <table className="w-full border-collapse text-10 mb-2">
               <thead>
-                <tr style={{ borderBottom: '1px solid #000' }}>
-                  <th style={{ textAlign: 'left', padding: '2px 0', width: '30%' }}>Sản phẩm</th>
-                  <th style={{ textAlign: 'center', padding: '2px 0', width: '30%' }}>Đơn giá</th>
-                  <th style={{ textAlign: 'center', padding: '2px 0', width: '10%' }}>SL</th>
-                  <th style={{ textAlign: 'center', padding: '2px 0', width: '30%' }}>T.tiền</th>
+                <tr className="border-b border-black">
+                  <th className="text-left py-0.5 w-1/4">Sản phẩm</th>
+                  <th className="text-center py-0.5 w-1/4">Đơn giá</th>
+                  <th className="text-center py-0.5 w-2/10">SL</th>
+                  <th className="text-center py-0.5 w-3/10">T.tiền</th>
                 </tr>
               </thead>
               <tbody>
                 {invoiceData.products.map((product, index) => (
                   <tr key={index}>
-                    <td style={{ padding: '2px 0', borderBottom: '1px dotted #ccc' }}>{product.name}</td>
-                    <td style={{ textAlign: 'center', padding: '2px 0', borderBottom: '1px dotted #ccc' }}>
+                    <td className="py-0.5 border-b border-dotted border-gray-300">{product.name}</td>
+                    <td className="text-center py-0.5 border-b border-dotted border-gray-300">
                       {formatCurrency(product.price)}
                     </td>
-                    <td style={{ textAlign: 'center', padding: '2px 0', borderBottom: '1px dotted #ccc' }}>
+                    <td className="text-center py-0.5 border-b border-dotted border-gray-300">
                       {product.quantity}
                     </td>
-                    <td style={{ textAlign: 'center', padding: '2px 0', borderBottom: '1px dotted #ccc' }}>
+                    <td className="text-center py-0.5 border-b border-dotted border-gray-300">
                       {formatCurrency(product.price * product.quantity)}
                     </td>
                   </tr>
@@ -247,50 +241,32 @@ function SaleManager() {
             </table>
 
             {/* Total */}
-            <div
-              style={{
-                borderTop: '2px solid #000',
-                paddingTop: '5px',
-                marginBottom: '10px',
-                textAlign: 'right',
-                fontWeight: 'bold',
-                fontSize: '11px',
-              }}
-            >
-              <div>Tổng {invoiceData.products.length}SP</div>
-              <div style={{ fontSize: '12px', marginTop: '2px' }}>
+            <div className="border-t border-black pt-1.5 mb-2.5 text-left  text-11">
+              <div>Tổng {invoiceData.products.length} sản phẩm</div>
+              <div className="text-sm font-semibold mt-0.5">
                 Tiền thanh toán: {formatCurrency(invoiceData.total)}
               </div>
             </div>
 
             {/* QR Code Section */}
-            <div style={{ textAlign: 'center', margin: '10px 0', fontSize: '10px' }}>
-              <img
-                src={qrBankImage}
-                alt="QR Code Ngân hàng"
-                style={{
-                  width: '40mm',
-                  height: '40mm',
-                  margin: '0 auto',
-                  display: 'block',
-                }}
-              />
-              <div style={{ marginTop: '5px', fontSize: '9px' }}>
-                Agribank<br />
-                THAI THI LIEU<br />
-                5300208656279
+            <div className="my-2.5 text-10">
+              {/* Horizontal line above QR */}
+              <div className="border-t border-black mb-2"></div>
+              
+              {/* QR Code and Bank Info Container */}
+              <div className="flex items-center justify-between">
+                <img
+                  src={qrBankImage}
+                  alt="QR Code Ngân hàng"
+                  className="w-25mm h-25mm"
+                  style={{ width: '25mm', height: '25mm' }}
+                />
+                <div className="text-xs leading-tight text-right font-semibold mr-5mm" style={{ marginRight: '5mm' }}>
+                  <div>OCB PHƯƠNG ĐÔNG</div>
+                  <div>NGUYEN VAN VU</div>
+                  <div>12345678910</div>
+                </div>
               </div>
-            </div>
-
-            {/* Invoice Number */}
-            <div style={{ textAlign: 'center', fontSize: '10px', marginTop: '10px' }}>
-              #{Math.floor(Math.random() * 10000).toString().padStart(4, '0')}
-            </div>
-
-            {/* Footer */}
-            <div style={{ textAlign: 'center', marginTop: '15px', fontSize: '9px' }}>
-              <div>Xin chào</div>
-              <div style={{ marginTop: '10px' }}>TT Hương</div>
             </div>
           </div>
         </div>
