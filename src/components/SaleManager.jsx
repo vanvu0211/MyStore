@@ -2,39 +2,63 @@ import { useState, useEffect, useRef } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import { API_URL } from '../config';
 import { formatCurrency } from '../utils/utils';
-import qrBankImage from '../assets/qr_bank.png'; // Import hình ảnh QR từ thư mục assets
+import qrBankImage from '../assets/qr_bank.png';
 
 function SaleManager() {
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [customerName, setCustomerName] = useState('');
   const [invoiceData, setInvoiceData] = useState(null);
   const [quantities, setQuantities] = useState({});
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false); // Add loading state
 
   const componentRef = useRef();
 
-  // Fetch sản phẩm khi component được mount
   useEffect(() => {
-    fetchProducts();
+    fetchData();
   }, []);
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      await Promise.all([fetchProducts(), fetchCategories()]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchProducts = async () => {
     try {
       const response = await fetch(`${API_URL}/Product`);
-      if (!response.ok) throw new Error('Failed to fetch products');
+      if (!response.ok) throw new Error('Không thể tải danh sách sản phẩm');
       const data = await response.json();
       setProducts(data);
+      setError(null);
     } catch (error) {
       console.error('Error fetching products:', error);
+      setError('Không thể tải danh sách sản phẩm');
     }
   };
 
-  // Cấu hình react-to-print
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch(`${API_URL}/Category`);
+      if (!response.ok) throw new Error('Không thể tải danh sách danh mục');
+      const data = await response.json();
+      setCategories(data);
+      setError(null);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      setError('Không thể tải danh sách danh mục');
+    }
+  };
+
   const handlePrint = useReactToPrint({
     contentRef: componentRef,
     documentTitle: `Invoice_${customerName}_${new Date().toISOString()}`,
     onAfterPrint: () => {
-      // Reset trạng thái sau khi in xong
       setInvoiceData(null);
       setSelectedProducts([]);
       setCustomerName('');
@@ -42,19 +66,16 @@ function SaleManager() {
     },
   });
 
-  // Hook useEffect để trigger việc in sau khi invoiceData đã được cập nhật
   useEffect(() => {
     if (invoiceData) {
       handlePrint();
     }
   }, [invoiceData, handlePrint]);
 
-  // Cập nhật số lượng tạm thời trong input
   const updateQuantity = (productId, quantity) => {
     setQuantities({ ...quantities, [productId]: parseInt(quantity) || 1 });
   };
 
-  // Thêm sản phẩm vào giỏ hàng
   const addProduct = (productToAdd) => {
     const quantity = quantities[productToAdd.id] || 1;
     const existingProduct = selectedProducts.find((p) => p.id === productToAdd.id);
@@ -71,14 +92,15 @@ function SaleManager() {
     setQuantities({ ...quantities, [productToAdd.id]: 1 });
   };
 
-  // Xóa sản phẩm khỏi giỏ hàng
   const removeProduct = (id) => {
     setSelectedProducts(selectedProducts.filter((p) => p.id !== id));
   };
 
-  // Chuẩn bị dữ liệu và trigger việc in
   const prepareAndPrint = () => {
-    if (!customerName || selectedProducts.length === 0) return;
+    if (!customerName || selectedProducts.length === 0) {
+      setError('Vui lòng nhập tên khách hàng và chọn ít nhất một sản phẩm');
+      return;
+    }
 
     const invoiceToPrint = {
       customerName,
@@ -87,95 +109,135 @@ function SaleManager() {
     };
 
     setInvoiceData(invoiceToPrint);
+    setError(null);
   };
 
+  const groupedProducts = categories.reduce((acc, category) => {
+    acc[category.id] = products.filter((product) => product.categoryId === category.id);
+    return acc;
+  }, {});
+
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <h2 className="text-2xl font-bold text-gray-900 mb-4">Bán hàng</h2>
-      <div className="grid grid-cols-2 gap-6">
-        <div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">Danh sách hàng hóa</h3>
-          <div className="grid grid-cols-2 gap-4">
-            {products.map((product) => (
-              <div key={product.id} className="border p-4 rounded shadow bg-white">
-                <img
-                  src={product.imageUrl}
-                  alt={product.name}
-                  className="w-full h-32 object-cover mb-2 rounded"
-                />
-                <h4 className="font-bold text-gray-900">{product.name}</h4>
-                <p className="text-gray-600">Giá: {formatCurrency(product.price)}</p>
-                <div className="flex items-center mt-2">
-                  <input
-                    type="number"
-                    min="1"
-                    value={quantities[product.id] || 1}
-                    onChange={(e) => updateQuantity(product.id, e.target.value)}
-                    placeholder="Số lượng (thùng)"
-                    className="border p-2 rounded w-24 mr-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <button
-                    onClick={() => addProduct(product)}
-                    className="bg-blue-500 text-white p-2 rounded flex-1 hover:bg-blue-600 transition-colors"
-                  >
-                    Thêm
-                  </button>
+    <div className="p-2 max-w-full bg-gray-50 min-h-screen">
+      <h2 className="text-3xl font-bold text-gray-900 mb-6 px-2 leading-relaxed">Bán hàng</h2>
+      {error && <p className="text-red-500 mb-6 px-2 text-base leading-relaxed">{error}</p>}
+      {loading ? (
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      ) : (
+        <div className="flex gap-4">
+          <div className="flex-1 pr-2">
+            <h3 className="text-2xl font-semibold text-gray-900 mb-6 leading-relaxed">Danh sách hàng hóa</h3>
+            {categories.length === 0 && products.length === 0 ? (
+              <p className="text-gray-600 text-base leading-relaxed">Không có sản phẩm hoặc danh mục nào để hiển thị</p>
+            ) : (
+              categories.map((category) => (
+                groupedProducts[category.id]?.length > 0 && (
+                  <div key={category.id} className="mb-6">
+                    <h4 className="text-xl font-semibold text-gray-800 mb-4 border-b pb-2 leading-relaxed">{category.name}</h4>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-2">
+                      {groupedProducts[category.id].map((product) => (
+                        <div key={product.id} className="border rounded-lg shadow-sm bg-white hover:shadow-md transition-all duration-200 hover:scale-105 p-3">
+                          <div className="relative">
+                            <img
+                              src={product.imageUrl}
+                              alt={product.name}
+                              className="w-full h-32 object-cover mb-3 rounded-md"
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                              }}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <h4 className="font-semibold text-gray-900 text-base leading-relaxed line-clamp-2 min-h-[2.5rem]">
+                              {product.name}
+                            </h4>
+                            <p className="text-blue-600 font-bold text-base">
+                              {formatCurrency(product.price)}
+                            </p>
+                            <div className="flex flex-col gap-2">
+                              <input
+                                type="number"
+                                min="1"
+                                value={quantities[product.id] || 1}
+                                onChange={(e) => updateQuantity(product.id, e.target.value)}
+                                placeholder="Số lượng"
+                                className="border border-gray-300 p-2 rounded-md w-full text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                disabled={loading}
+                              />
+                              <button
+                                onClick={() => addProduct(product)}
+                                className="bg-blue-500 text-white py-2 px-3 rounded-md text-base font-medium hover:bg-blue-600 transition-colors duration-200 active:transform active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                                disabled={loading}
+                              >
+                                {loading ? 'Đang xử lý...' : 'Thêm vào giỏ'}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )
+              ))
+            )}
+          </div>
+
+          <div className="w-96 bg-white rounded-lg shadow-lg p-4 h-fit sticky top-4">
+            <h3 className="text-2xl font-semibold text-gray-900 mb-6 text-center leading-relaxed">Giỏ hàng</h3>
+            <input
+              type="text"
+              value={customerName}
+              onChange={(e) => setCustomerName(e.target.value)}
+              placeholder="Tên khách hàng"
+              className="border border-gray-300 p-3 rounded-md mb-6 w-full text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              required
+              disabled={loading}
+            />
+            <div className="max-h-96 overflow-y-auto mb-6">
+              {selectedProducts.length === 0 ? (
+                <div className="text-center py-8 text-gray-500 text-base leading-relaxed">
+                  <p>Giỏ hàng trống</p>
                 </div>
+              ) : (
+                <div className="space-y-3">
+                  {selectedProducts.map((product, index) => (
+                    <div key={product.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-md">
+                      <span className="text-base text-gray-900 font-medium">{index + 1}. {product.name}</span>
+                      <div className="text-sm text-gray-600">
+                        <span>{formatCurrency(product.price * product.quantity)}</span>
+                        <button
+                          onClick={() => removeProduct(product.id)}
+                          className="ml-4 text-red-500 hover:text-red-700 text-base font-medium disabled:text-gray-400 disabled:cursor-not-allowed"
+                          disabled={loading}
+                        >
+                          Xóa
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="border-t pt-6">
+              <div className="flex justify-between items-center mb-6">
+                <span className="text-xl font-semibold">Tổng cộng:</span>
+                <span className="text-2xl font-bold text-blue-600">
+                  {formatCurrency(selectedProducts.reduce((sum, p) => sum + p.price * p.quantity, 0))}
+                </span>
               </div>
-            ))}
+              <button
+                onClick={prepareAndPrint}
+                className="bg-green-500 text-white py-3 rounded-md w-full text-base font-medium hover:bg-green-600 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                disabled={!customerName || selectedProducts.length === 0 || loading}
+              >
+                {loading ? 'Đang xử lý...' : 'Xuất hóa đơn'}
+              </button>
+            </div>
           </div>
         </div>
-        <div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">Giỏ hàng</h3>
-          <input
-            type="text"
-            value={customerName}
-            onChange={(e) => setCustomerName(e.target.value)}
-            placeholder="Tên khách hàng"
-            className="border p-2 rounded mb-4 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          />
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="bg-gray-100 text-gray-900">
-                <th className="border p-3 text-left">Tên</th>
-                <th className="border p-3 text-left">Giá</th>
-                <th className="border p-3 text-left">Số lượng</th>
-                <th className="border p-3 text-left">Thành tiền</th>
-                <th className="border p-3 text-left">Hành động</th>
-              </tr>
-            </thead>
-            <tbody>
-              {selectedProducts.map((product) => (
-                <tr key={product.id} className="hover:bg-gray-50">
-                  <td className="border p-3">{product.name}</td>
-                  <td className="border p-3">{formatCurrency(product.price)}</td>
-                  <td className="border p-3">{product.quantity}</td>
-                  <td className="border p-3">{formatCurrency(product.price * product.quantity)}</td>
-                  <td className="border p-3">
-                    <button
-                      onClick={() => removeProduct(product.id)}
-                      className="bg-red-500 text-white p-1 px-3 rounded hover:bg-red-600 transition-colors"
-                    >
-                      Xóa
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <p className="mt-4 font-semibold">
-            Tổng cộng: {formatCurrency(selectedProducts.reduce((sum, p) => sum + p.price * p.quantity, 0))}
-          </p>
-          <button
-            onClick={prepareAndPrint}
-            className="bg-green-500 text-white p-2 rounded mt-4 w-full hover:bg-green-600 transition-colors disabled:bg-gray-400"
-            disabled={!customerName || selectedProducts.length === 0}
-          >
-            Xuất hóa đơn
-          </button>
-        </div>
-      </div>
+      )}
 
       {/* Printable Invoice Section */}
       {invoiceData && (
@@ -241,7 +303,7 @@ function SaleManager() {
             </table>
 
             {/* Total */}
-            <div className="border-t border-black pt-1.5 mb-2.5 text-left  text-11">
+            <div className="border-t border-black pt-1.5 mb-2.5 text-left text-11">
               <div>Tổng {invoiceData.products.length} sản phẩm</div>
               <div className="text-sm font-semibold mt-0.5">
                 Tiền thanh toán: {formatCurrency(invoiceData.total)}
@@ -250,10 +312,7 @@ function SaleManager() {
 
             {/* QR Code Section */}
             <div className="my-2.5 text-10">
-              {/* Horizontal line above QR */}
               <div className="border-t border-black mb-2"></div>
-              
-              {/* QR Code and Bank Info Container */}
               <div className="flex items-center justify-between">
                 <img
                   src={qrBankImage}
@@ -261,7 +320,10 @@ function SaleManager() {
                   className="w-25mm h-25mm"
                   style={{ width: '25mm', height: '25mm' }}
                 />
-                <div className="text-xs leading-tight text-right font-semibold mr-5mm" style={{ marginRight: '5mm' }}>
+                <div
+                  className="text-xs leading-tight text-right font-semibold mr-5mm"
+                  style={{ marginRight: '5mm' }}
+                >
                   <div>OCB PHƯƠNG ĐÔNG</div>
                   <div>NGUYEN VAN VU</div>
                   <div>12345678910</div>
