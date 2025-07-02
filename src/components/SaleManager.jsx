@@ -119,7 +119,6 @@ function SaleManager() {
 
   return (
     <div className="p-2 max-w-full bg-gray-50 min-h-screen">
-      <h2 className="text-3xl font-bold text-gray-900 mb-6 px-2 leading-relaxed">Bán hàng</h2>
       {error && <p className="text-red-500 mb-6 px-2 text-base leading-relaxed">{error}</p>}
       {loading ? (
         <div className="flex justify-center items-center h-64">
@@ -135,7 +134,7 @@ function SaleManager() {
               categories.map((category) => (
                 groupedProducts[category.id]?.length > 0 && (
                   <div key={category.id} className="mb-6">
-                    <h4 className="text-xl font-semibold text-gray-800 mb-4 border-b pb-2 leading-relaxed">{category.name}</h4>
+                    <h4 className="text-2xl font-bold  text-green-700 bg-green-200 mb-4 border-b pb-2 leading-relaxed">{category.name}</h4>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-2">
                       {groupedProducts[category.id].map((product) => (
                         <div key={product.id} className="border rounded-lg shadow-sm bg-white hover:shadow-md transition-all duration-200 hover:scale-105 p-3">
