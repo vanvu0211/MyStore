@@ -15,13 +15,13 @@ function App() {
           <div className="w-full flex justify-between items-center px-4">
             <h1 className="text-2xl font-bold">Tạp Hóa Văn Bằng</h1>
             <div className="hidden md:flex space-x-4">
-              <Link to="/sales" className="hover:bg-blue-700 px-3 py-2 rounded transition-colors">
+              <Link to="/" className="hover:bg-blue-700 px-3 py-2 rounded transition-colors">
                 Bán hàng
-              </Link>   
+              </Link>
               <Link to="/products" className="hover:bg-blue-700 px-3 py-2 rounded transition-colors">
                 Quản lý hàng hóa
               </Link>
-               <Link to="/" className="hover:bg-blue-700 px-3 py-2 rounded transition-colors">
+              <Link to="/category" className="hover:bg-blue-700 px-3 py-2 rounded transition-colors">
                 Quản lý loại hàng hóa
               </Link>
             </div>
@@ -41,14 +41,13 @@ function App() {
           </div>
           {isMenuOpen && (
             <div className="md:hidden mt-2 px-4">
-               <Link
-                to="/sales"
+              <Link
+                to="/"
                 className="block hover:bg-blue-700 px-3 py-2 rounded transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Bán hàng
               </Link>
-              
               <Link
                 to="/products"
                 className="block hover:bg-blue-700 px-3 py-2 rounded transition-colors"
@@ -57,7 +56,7 @@ function App() {
                 Quản lý hàng hóa
               </Link>
               <Link
-                to="/"
+                to="/category"
                 className="block hover:bg-blue-700 px-3 py-2 rounded transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
@@ -70,9 +69,9 @@ function App() {
         {/* Main Content - Full Width */}
         <div className="flex-grow w-full p-4">
           <Routes>
-            <Route path="/" element={<CategoryManager />} />
+            <Route path="/category" element={<CategoryManager />} />
             <Route path="/products" element={<ProductManager />} />
-            <Route path="/sales" element={<SaleManager />} />
+            <Route path="/" element={<SaleManager />} />
           </Routes>
         </div>
       </div>
