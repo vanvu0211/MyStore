@@ -12,7 +12,7 @@ function SaleManager() {
   const [invoiceData, setInvoiceData] = useState(null);
   const [quantities, setQuantities] = useState({});
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false); // Add loading state
+  const [loading, setLoading] = useState(false);
 
   const componentRef = useRef();
 
@@ -72,12 +72,20 @@ function SaleManager() {
     }
   }, [invoiceData, handlePrint]);
 
-  const updateQuantity = (productId, quantity) => {
-    setQuantities({ ...quantities, [productId]: parseInt(quantity) || 1 });
+  const updateQuantity = (productId, value) => {
+    // Cho phép giá trị rỗng hoặc số hợp lệ
+    if (value === '' || (!isNaN(value) && parseInt(value) >= 0)) {
+      setQuantities({ ...quantities, [productId]: value });
+    }
   };
 
   const addProduct = (productToAdd) => {
-    const quantity = quantities[productToAdd.id] || 1;
+    // Lấy số lượng từ input, nếu rỗng hoặc 0 thì mặc định là 1
+    const inputQuantity = quantities[productToAdd.id];
+    const quantity = inputQuantity === '' || inputQuantity === '0' || !inputQuantity 
+      ? 1 
+      : parseInt(inputQuantity);
+    
     const existingProduct = selectedProducts.find((p) => p.id === productToAdd.id);
 
     if (existingProduct) {
@@ -89,7 +97,9 @@ function SaleManager() {
     } else {
       setSelectedProducts([...selectedProducts, { ...productToAdd, quantity }]);
     }
-    setQuantities({ ...quantities, [productToAdd.id]: 1 });
+    
+    // Reset về trống sau khi thêm
+    setQuantities({ ...quantities, [productToAdd.id]: '' });
   };
 
   const removeProduct = (id) => {
@@ -134,7 +144,7 @@ function SaleManager() {
               categories.map((category) => (
                 groupedProducts[category.id]?.length > 0 && (
                   <div key={category.id} className="mb-6">
-                    <h4 className="text-2xl font-bold  text-green-700 bg-green-200 mb-4 border-b pb-2 leading-relaxed">{category.name}</h4>
+                    <h4 className="text-2xl font-bold  text-blue-700 bg-blue-200 mb-4 border-b pb-2 leading-relaxed">{category.name}</h4>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-2">
                       {groupedProducts[category.id].map((product) => (
                         <div key={product.id} className="border rounded-lg shadow-sm bg-white hover:shadow-md transition-all duration-200 hover:scale-105 p-3">
@@ -159,11 +169,12 @@ function SaleManager() {
                               <input
                                 type="number"
                                 min="1"
-                                value={quantities[product.id] || 1}
+                                value={quantities[product.id] || ''}
                                 onChange={(e) => updateQuantity(product.id, e.target.value)}
                                 placeholder="Số lượng"
                                 className="border border-gray-300 p-2 rounded-md w-full text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 disabled={loading}
+                                onFocus={(e) => e.target.select()} // Chọn tất cả text khi focus
                               />
                               <button
                                 onClick={() => addProduct(product)}
@@ -203,12 +214,22 @@ function SaleManager() {
                 <div className="space-y-3">
                   {selectedProducts.map((product, index) => (
                     <div key={product.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-md">
-                      <span className="text-base text-gray-900 font-medium">{index + 1}. {product.name}</span>
-                      <div className="text-sm text-gray-600">
-                        <span>{formatCurrency(product.price * product.quantity)}</span>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-base text-gray-900 font-medium">{index + 1}. {product.name}</span>
+                          <span className="bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded-full min-w-[24px] text-center">
+                            {product.quantity}
+                          </span>
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          {formatCurrency(product.price)} x {product.quantity}
+                        </div>
+                      </div>
+                      <div className="text-sm text-gray-600 text-right">
+                        <div className="font-semibold text-lg text-blue-600">{formatCurrency(product.price * product.quantity)}</div>
                         <button
                           onClick={() => removeProduct(product.id)}
-                          className="ml-4 text-red-500 hover:text-red-700 text-base font-medium disabled:text-gray-400 disabled:cursor-not-allowed"
+                          className="mt-1 text-red-500 hover:text-red-700 text-sm font-medium disabled:text-gray-400 disabled:cursor-not-allowed"
                           disabled={loading}
                         >
                           Xóa
