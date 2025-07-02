@@ -10,6 +10,7 @@ function ProductManager() {
   const [price, setPrice] = useState('');
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState('');
+  const [imageBase64, setImageBase64] = useState('');
   const [editId, setEditId] = useState(null);
   const [error, setError] = useState(null);
 
@@ -46,9 +47,16 @@ function ProductManager() {
     if (file) {
       setImageFile(file);
       setImagePreview(URL.createObjectURL(file));
+      // Convert image to base64
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImageBase64(reader.result);
+      };
+      reader.readAsDataURL(file);
     } else {
       setImageFile(null);
       setImagePreview('');
+      setImageBase64('');
     }
   };
 
@@ -63,7 +71,7 @@ function ProductManager() {
       name,
       categoryId: parseInt(categoryId),
       price: parseFloat(price),
-      imageUrl: imagePreview || 'https://via.placeholder.com/150',
+      imageUrl: imageBase64 || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=', // Default base64 for placeholder
     };
     try {
       if (editId) {
@@ -85,6 +93,7 @@ function ProductManager() {
       setPrice('');
       setImageFile(null);
       setImagePreview('');
+      setImageBase64('');
       fetchProducts();
     } catch (err) {
       setError('Lỗi khi lưu sản phẩm. Vui lòng kiểm tra lại.');
@@ -97,6 +106,7 @@ function ProductManager() {
     setCategoryId(product.categoryId?.toString() || '');
     setPrice(product.price?.toString() || '');
     setImagePreview(product.imageUrl || '');
+    setImageBase64(product.imageUrl || '');
     setImageFile(null);
   };
 
@@ -112,7 +122,7 @@ function ProductManager() {
   };
 
   return (
-    <div>
+    <div className="p-6">
       <h2 className="text-2xl font-bold text-gray-900 mb-4">Quản lý hàng hóa</h2>
       {error && <p className="text-red-500 mb-4">{error}</p>}
       <form onSubmit={handleSubmit} className="mb-6 grid grid-cols-2 gap-4">
@@ -160,7 +170,7 @@ function ProductManager() {
           {editId ? 'Cập nhật' : 'Thêm'}
         </button>
       </form>
-      <p className="text-yellow-600 mb-4">Lưu ý: Ảnh được chọn chỉ hiển thị bản xem trước. Bạn cần tải ảnh lên dịch vụ lưu trữ và sử dụng URL hợp lệ để lưu sản phẩm.</p>
+      <p className="text-yellow-600 mb-4">Lưu ý: Ảnh được lưu dưới dạng chuỗi base64.</p>
       <table className="w-full border-collapse">
         <thead>
           <tr className="bg-gray-100 text-gray-900">
