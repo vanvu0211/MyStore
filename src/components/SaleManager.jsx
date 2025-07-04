@@ -261,98 +261,98 @@ function SaleManager() {
 
       {/* Printable Invoice Section */}
       {invoiceData && (
-        <div className="hidden print:block">
+  <div className="hidden print:block">
+    <div
+      ref={componentRef}
+      className="w-80 p-2 text-sm font-sans bg-white text-black"
+      style={{ width: '80mm', padding: '2mm' }}
+    >
+      {/* Header */}
+      <div className="text-center mb-2.5">
+        <div className="font-bold text-base">Tạp hóa Văn Bằng</div>
+        <div className="text-11 leading-tight">
+          0966900544 - Thôn 5, Quảng Tín, Đắk R Lấp
+        </div>
+      </div>
+
+      {/* Invoice Title */}
+      <div className="text-center my-2.5">
+        <div className="font-bold text-14">HÓA ĐƠN TẠM TÍNH</div>
+        <div className="text-11">
+          {new Date().toLocaleDateString('vi-VN', {
+            day: '2-digit',
+            month: '2-digit',
+            year: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+          })}
+        </div>
+      </div>
+
+      {/* Customer */}
+      <div className="mb-2 text-11">
+        <strong>Khách:</strong> {invoiceData.customerName}
+      </div>
+
+      {/* Products Table */}
+      <table className="w-full border-collapse text-11 mb-2">
+        <thead>
+          <tr className="border-b border-black">
+            <th className="text-left py-0.5 w-1/4">Sản phẩm</th>
+            <th className="text-center py-0.5 w-1/4">Đơn giá</th>
+            <th className="text-center py-0.5 w-2/10">SL</th>
+            <th className="text-center py-0.5 w-3/10">T.tiền</th>
+          </tr>
+        </thead>
+        <tbody>
+          {invoiceData.products.map((product, index) => (
+            <tr key={index}>
+              <td className="py-0.5 border-b border-dotted border-gray-300">{product.name}</td>
+              <td className="text-center py-0.5 border-b border-dotted border-gray-300">
+                {formatCurrency(product.price)}
+              </td>
+              <td className="text-center py-0.5 border-b border-dotted border-gray-300">
+                {product.quantity}
+              </td>
+              <td className="text-center py-0.5 border-b border-dotted border-gray-300">
+                {formatCurrency(product.price * product.quantity)}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {/* Total */}
+      <div className="border-t border-black pt-1.5 mb-2.5 text-left text-12">
+        <div>Tổng {invoiceData.products.length} sản phẩm</div>
+        <div className="text-base font-semibold mt-0.5">
+          Tiền thanh toán: {formatCurrency(invoiceData.total)}
+        </div>
+      </div>
+
+      {/* QR Code Section */}
+      <div className="my-2.5 text-11">
+        <div className="border-t border-black mb-2"></div>
+        <div className="flex items-center justify-between">
+          <img
+            src={qrBankImage}
+            alt="QR Code Ngân hàng"
+            className="w-25mm h-25mm"
+            style={{ width: '25mm', height: '25mm' }}
+          />
           <div
-            ref={componentRef}
-            className="w-72 p-5 text-xs font-sans bg-white text-black"
-            style={{ width: '72mm', padding: '5mm' }}
+            className="text-sm leading-tight text-right font-semibold mr-5mm"
+            style={{ marginRight: '5mm' }}
           >
-            {/* Header */}
-            <div className="text-center mb-2.5">
-              <div className="font-bold text-sm">Tạp hóa Văn Bằng</div>
-              <div className="text-10 leading-tight">
-                0966900544 - Thôn 5, Quảng Tín, Đắk R Lấp
-              </div>
-            </div>
-
-            {/* Invoice Title */}
-            <div className="text-center my-2.5">
-              <div className="font-bold text-13">HÓA ĐƠN TẠM TÍNH</div>
-              <div className="text-10">
-                {new Date().toLocaleDateString('vi-VN', {
-                  day: '2-digit',
-                  month: '2-digit',
-                  year: '2-digit',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
-              </div>
-            </div>
-
-            {/* Customer */}
-            <div className="mb-2 text-10">
-              <strong>Khách:</strong> {invoiceData.customerName}
-            </div>
-
-            {/* Products Table */}
-            <table className="w-full border-collapse text-10 mb-2">
-              <thead>
-                <tr className="border-b border-black">
-                  <th className="text-left py-0.5 w-1/4">Sản phẩm</th>
-                  <th className="text-center py-0.5 w-1/4">Đơn giá</th>
-                  <th className="text-center py-0.5 w-2/10">SL</th>
-                  <th className="text-center py-0.5 w-3/10">T.tiền</th>
-                </tr>
-              </thead>
-              <tbody>
-                {invoiceData.products.map((product, index) => (
-                  <tr key={index}>
-                    <td className="py-0.5 border-b border-dotted border-gray-300">{product.name}</td>
-                    <td className="text-center py-0.5 border-b border-dotted border-gray-300">
-                      {formatCurrency(product.price)}
-                    </td>
-                    <td className="text-center py-0.5 border-b border-dotted border-gray-300">
-                      {product.quantity}
-                    </td>
-                    <td className="text-center py-0.5 border-b border-dotted border-gray-300">
-                      {formatCurrency(product.price * product.quantity)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-
-            {/* Total */}
-            <div className="border-t border-black pt-1.5 mb-2.5 text-left text-11">
-              <div>Tổng {invoiceData.products.length} sản phẩm</div>
-              <div className="text-sm font-semibold mt-0.5">
-                Tiền thanh toán: {formatCurrency(invoiceData.total)}
-              </div>
-            </div>
-
-            {/* QR Code Section */}
-            <div className="my-2.5 text-10">
-              <div className="border-t border-black mb-2"></div>
-              <div className="flex items-center justify-between">
-                <img
-                  src={qrBankImage}
-                  alt="QR Code Ngân hàng"
-                  className="w-25mm h-25mm"
-                  style={{ width: '25mm', height: '25mm' }}
-                />
-                <div
-                  className="text-xs leading-tight text-right font-semibold mr-5mm"
-                  style={{ marginRight: '5mm' }}
-                >
-                  <div>OCB PHƯƠNG ĐÔNG</div>
-                  <div>NGUYEN VAN VU</div>
-                  <div>12345678910</div>
-                </div>
-              </div>
-            </div>
+            <div>OCB PHƯƠNG ĐÔNG</div>
+            <div>NGUYEN VAN VU</div>
+            <div>12345678910</div>
           </div>
         </div>
-      )}
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 }

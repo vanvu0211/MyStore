@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { API_URL } from '../config';
 import { formatCurrency } from '../utils/utils';
+import imageCompression from 'browser-image-compression';
 
 function ProductManager() {
   const [products, setProducts] = useState([]);
@@ -13,7 +14,7 @@ function ProductManager() {
   const [imageBase64, setImageBase64] = useState('');
   const [editId, setEditId] = useState(null);
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false); // Add loading state
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -55,9 +56,51 @@ function ProductManager() {
     }
   };
 
-  const handleImageChange = (e) => {
+  // Handle image change with compression
+  const handleImageChange = async (e) => {
     const file = e.target.files[0];
-    if (file) {
+    if (!file) {
+      setImageFile(null);
+      setImagePreview('');
+      setImageBase64('');
+      return;
+    }
+
+    const allowedTypes = ['image/jpeg', 'image/png'];
+    if (!allowedTypes.includes(file.type)) {
+      setError('Chỉ chấp nhận file ảnh (JPEG, PNG)!');
+      e.target.value = '';
+      setImageFile(null);
+      setImagePreview('');
+      setImageBase64('');
+      return;
+    }
+
+    const maxSizeBeforeCompression = 300 * 1024; // 300KB
+    if (file.size > maxSizeBeforeCompression) {
+      try {
+        const options = {
+          maxSizeMB: 0.3,
+          maxWidthOrHeight: 1920,
+          useWebWorker: true,
+          initialQuality: 0.9,
+        };
+        const compressedFile = await imageCompression(file, options);
+        setImageFile(compressedFile);
+        setImagePreview(URL.createObjectURL(compressedFile));
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setImageBase64(reader.result);
+        };
+        reader.readAsDataURL(compressedFile);
+      } catch (error) {
+        setError('Lỗi khi nén ảnh: ' + error.message);
+        e.target.value = '';
+        setImageFile(null);
+        setImagePreview('');
+        setImageBase64('');
+      }
+    } else {
       setImageFile(file);
       setImagePreview(URL.createObjectURL(file));
       const reader = new FileReader();
@@ -65,11 +108,24 @@ function ProductManager() {
         setImageBase64(reader.result);
       };
       reader.readAsDataURL(file);
-    } else {
-      setImageFile(null);
-      setImagePreview('');
-      setImageBase64('');
     }
+  };
+
+  // Handle price input with currency formatting
+  const handlePriceChange = (e) => {
+    let value = e.target.value.replace(/[^0-9]/g, ''); // Remove non-numeric characters
+    if (value === '') {
+      setPrice('');
+      return;
+    }
+    // Format as 100.000
+    value = parseInt(value).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    setPrice(value);
+  };
+
+  // Convert formatted price to number for submission
+  const getRawPrice = (formattedPrice) => {
+    return parseFloat(formattedPrice.replace(/\./g, '')) || 0;
   };
 
   const handleSubmit = async (e) => {
@@ -79,11 +135,11 @@ function ProductManager() {
       return;
     }
     setError(null);
-    setLoading(true); // Set loading true during submission
+    setLoading(true);
     const product = {
       name,
       categoryId: parseInt(categoryId),
-      price: parseFloat(price),
+      price: getRawPrice(price),
       imageUrl: imageBase64 || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
     };
     try {
@@ -119,14 +175,14 @@ function ProductManager() {
     setEditId(product.id);
     setName(product.name);
     setCategoryId(product.categoryId?.toString() || '');
-    setPrice(product.price?.toString() || '');
+    setPrice(product.price ? product.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '');
     setImagePreview(product.imageUrl || '');
     setImageBase64(product.imageUrl || '');
     setImageFile(null);
   };
 
   const handleDelete = async (id) => {
-    setLoading(true); // Set loading true during deletion
+    setLoading(true);
     try {
       await fetch(`${API_URL}/Product/${id}`, {
         method: 'DELETE',
@@ -174,23 +230,29 @@ function ProductManager() {
                 </option>
               ))}
             </select>
-            <input
-              type="number"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              placeholder="Giá"
-              className="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-              disabled={loading}
-            />
+            <div className="relative">
+              <input
+                type="text"
+                value={price}
+                onChange={handlePriceChange}
+                placeholder="Giá (VD: 100.000)"
+                className="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+                required
+                disabled={loading}
+              />
+              <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500">đ</span>
+            </div>
             <div className="flex flex-col">
               <input
                 type="file"
-                accept="image/*"
+                accept="image/jpeg,image/png"
                 onChange={handleImageChange}
                 className="border p-2 rounded"
                 disabled={loading}
               />
+              <p className="text-gray-600 text-sm mt-1">
+                Ảnh lớn hơn 300KB sẽ được nén xuống ~300KB. Định dạng: JPEG, PNG.
+              </p>
               {imagePreview && (
                 <img src={imagePreview} alt="Preview" className="mt-2 w-32 h-32 object-cover rounded" />
               )}
@@ -219,7 +281,7 @@ function ProductManager() {
               {products.map((product) => (
                 <tr key={product.id} className="hover:bg-gray-50">
                   <td className="border p-3">{product.id}</td>
-                 <td className="border p-3">{product.name}</td>
+                  <td className="border p-3">{product.name}</td>
                   <td className="border p-3">{product.category?.name || 'N/A'}</td>
                   <td className="border p-3">{formatCurrency(product.price)}</td>
                   <td className="border p-3">
