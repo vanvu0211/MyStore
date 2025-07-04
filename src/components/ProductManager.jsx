@@ -179,6 +179,8 @@ function ProductManager() {
     setImagePreview(product.imageUrl || '');
     setImageBase64(product.imageUrl || '');
     setImageFile(null);
+    // Scroll to the top of the page
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleDelete = async (id, productName) => {
