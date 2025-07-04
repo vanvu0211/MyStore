@@ -5,8 +5,8 @@ function CategoryManager() {
   const [categories, setCategories] = useState([]);
   const [name, setName] = useState('');
   const [editId, setEditId] = useState(null);
-  const [loading, setLoading] = useState(false); // Add loading state
-  const [error, setError] = useState(null); // Add error state
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchCategories();
@@ -60,7 +60,10 @@ function CategoryManager() {
     setName(category.name);
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id, categoryName) => {
+    const confirmDelete = window.confirm(`Bạn có chắc chắn muốn xóa danh mục "${categoryName}"?`);
+    if (!confirmDelete) return;
+
     setLoading(true);
     try {
       await fetch(`${API_URL}/Category/${id}`, {
@@ -125,7 +128,7 @@ function CategoryManager() {
                       Sửa
                     </button>
                     <button
-                      onClick={() => handleDelete(category.id)}
+                      onClick={() => handleDelete(category.id, category.name)}
                       className="bg-red-500 text-white p-1 px-3 rounded hover:bg-red-600 transition-colors disabled:bg-gray-400"
                       disabled={loading}
                     >

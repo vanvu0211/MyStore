@@ -181,7 +181,10 @@ function ProductManager() {
     setImageFile(null);
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id, productName) => {
+    const confirmDelete = window.confirm(`Bạn có chắc chắn muốn xóa sản phẩm "${productName}"?`);
+    if (!confirmDelete) return;
+
     setLoading(true);
     try {
       await fetch(`${API_URL}/Product/${id}`, {
@@ -307,7 +310,7 @@ function ProductManager() {
                               Sửa
                             </button>
                             <button
-                              onClick={() => handleDelete(product.id)}
+                              onClick={() => handleDelete(product.id, product.name)}
                               className="bg-red-500 text-white p-1 px-3 rounded hover:bg-red-600 transition-colors disabled:bg-gray-400"
                               disabled={loading}
                             >
@@ -318,7 +321,7 @@ function ProductManager() {
                       ))}
                     </tbody>
                   </table>
-</div>
+                </div>
               )
             ))
           )}
