@@ -196,6 +196,12 @@ function ProductManager() {
     }
   };
 
+  // Group products by category
+  const groupedProducts = categories.reduce((acc, category) => {
+    acc[category.id] = products.filter((product) => product.categoryId === category.id);
+    return acc;
+  }, {});
+
   return (
     <div className="p-6">
       <h2 className="text-2xl font-bold text-gray-900 mb-4">Quản lý hàng hóa</h2>
@@ -266,47 +272,56 @@ function ProductManager() {
             </button>
           </form>
           <p className="text-yellow-600 mb-4">Lưu ý: Ảnh được lưu dưới dạng chuỗi base64.</p>
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="bg-gray-100 text-gray-900">
-                <th className="border p-3 text-left">ID</th>
-                <th className="border p-3 text-left">Tên</th>
-                <th className="border p-3 text-left">Loại</th>
-                <th className="border p-3 text-left">Giá</th>
-                <th className="border p-3 text-left">Hình ảnh</th>
-                <th className="border p-3 text-left">Hành động</th>
-              </tr>
-            </thead>
-            <tbody>
-              {products.map((product) => (
-                <tr key={product.id} className="hover:bg-gray-50">
-                  <td className="border p-3">{product.id}</td>
-                  <td className="border p-3">{product.name}</td>
-                  <td className="border p-3">{product.category?.name || 'N/A'}</td>
-                  <td className="border p-3">{formatCurrency(product.price)}</td>
-                  <td className="border p-3">
-                    <img src={product.imageUrl} alt={product.name} className="w-16 h-16 object-cover rounded" />
-                  </td>
-                  <td className="border p-3">
-                    <button
-                      onClick={() => handleEdit(product)}
-                      className="bg-yellow-500 text-white p-1 px-3 rounded hover:bg-yellow-600 mr-2 transition-colors disabled:bg-gray-400"
-                      disabled={loading}
-                    >
-                      Sửa
-                    </button>
-                    <button
-                      onClick={() => handleDelete(product.id)}
-                      className="bg-red-500 text-white p-1 px-3 rounded hover:bg-red-600 transition-colors disabled:bg-gray-400"
-                      disabled={loading}
-                    >
-                      {loading ? 'Đang xóa...' : 'Xóa'}
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          {categories.length === 0 && products.length === 0 ? (
+            <p className="text-gray-600 text-base leading-relaxed">Không có sản phẩm hoặc danh mục nào để hiển thị</p>
+          ) : (
+            categories.map((category) => (
+              groupedProducts[category.id]?.length > 0 && (
+                <div key={category.id} className="mb-6">
+                  <h4 className="text-xl font-bold text-blue-700 bg-blue-200 mb-4 border-b pb-2 leading-relaxed">{category.name}</h4>
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="bg-gray-100 text-gray-900">
+                        <th className="border p-3 text-left">ID</th>
+                        <th className="border p-3 text-left">Tên</th>
+                        <th className="border p-3 text-left">Giá</th>
+                        <th className="border p-3 text-left">Hình ảnh</th>
+                        <th className="border p-3 text-left">Hành động</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {groupedProducts[category.id].map((product) => (
+                        <tr key={product.id} className="hover:bg-gray-50">
+                          <td className="border p-3">{product.id}</td>
+                          <td className="border p-3">{product.name}</td>
+                          <td className="border p-3">{formatCurrency(product.price)}</td>
+                          <td className="border p-3">
+                            <img src={product.imageUrl} alt={product.name} className="w-16 h-16 object-cover rounded" />
+                          </td>
+                          <td className="border p-3">
+                            <button
+                              onClick={() => handleEdit(product)}
+                              className="bg-yellow-500 text-white p-1 px-3 rounded hover:bg-yellow-600 mr-2 transition-colors disabled:bg-gray-400"
+                              disabled={loading}
+                            >
+                              Sửa
+                            </button>
+                            <button
+                              onClick={() => handleDelete(product.id)}
+                              className="bg-red-500 text-white p-1 px-3 rounded hover:bg-red-600 transition-colors disabled:bg-gray-400"
+                              disabled={loading}
+                            >
+                              {loading ? 'Đang xóa...' : 'Xóa'}
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+</div>
+              )
+            ))
+          )}
         </>
       )}
     </div>
