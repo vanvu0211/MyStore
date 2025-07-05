@@ -404,10 +404,10 @@ function SaleManager() {
             <table className="w-full border-collapse text-11 mb-2">
               <thead>
                 <tr className="border-b border-black">
-                  <th className="text-left py-0.5 w-1/4">Sản phẩm</th>
+                  <th className="text-left py-0.5 w-4/10">Sản phẩm</th>
                   <th className="text-center py-0.5 w-1/4">Đơn giá</th>
-                  <th className="text-center py-0.5 w-2/10">SL</th>
-                  <th className="text-center py-0.5 w-3/10">T.tiền</th>
+                  <th className="text-center py-0.5 w-1/10">SL</th>
+                  <th className="text-center py-0.5 w-1/4">T.tiền</th>
                 </tr>
               </thead>
               <tbody>

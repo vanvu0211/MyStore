@@ -1,4 +1,4 @@
 export const formatCurrency = (amount) => {
   if (isNaN(amount) || amount == null) return '0 đ';
-  return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ' đ';
-};
+  return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') + 'đ';
+}; 
