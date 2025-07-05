@@ -31,7 +31,7 @@ function ProductManager() {
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch(`${API_URL}/Product`);
+      const response = await fetch(`${API_URL}/Products`);
       if (!response.ok) throw new Error('Không thể tải danh sách sản phẩm');
       const data = await response.json();
       setProducts(data);
@@ -43,7 +43,7 @@ function ProductManager() {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch(`${API_URL}/Category`);
+      const response = await fetch(`${API_URL}/Categories`);
       if (!response.ok) throw new Error('Không thể tải danh sách danh mục');
       const data = await response.json();
       setCategories(data);
@@ -140,18 +140,18 @@ function ProductManager() {
       name,
       categoryId: parseInt(categoryId),
       price: getRawPrice(price),
-      imageUrl: imageBase64 || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
+      image: imageBase64 || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
     };
     try {
       if (editId) {
-        await fetch(`${API_URL}/Product/${editId}`, {
+        await fetch(`${API_URL}/Products/${editId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ id: editId, ...product }),
         });
         setEditId(null);
       } else {
-        await fetch(`${API_URL}/Product`, {
+        await fetch(`${API_URL}/Products`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(product),
@@ -176,8 +176,8 @@ function ProductManager() {
     setName(product.name);
     setCategoryId(product.categoryId?.toString() || '');
     setPrice(product.price ? product.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '');
-    setImagePreview(product.imageUrl || '');
-    setImageBase64(product.imageUrl || '');
+    setImagePreview(product.image || '');
+    setImageBase64(product.image || '');
     setImageFile(null);
     // Scroll to the top of the page
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -189,7 +189,7 @@ function ProductManager() {
 
     setLoading(true);
     try {
-      await fetch(`${API_URL}/Product/${id}`, {
+      await fetch(`${API_URL}/Products/${id}`, {
         method: 'DELETE',
       });
       await fetchProducts();
@@ -301,7 +301,7 @@ function ProductManager() {
                           <td className="border p-3">{product.name}</td>
                           <td className="border p-3">{formatCurrency(product.price)}</td>
                           <td className="border p-3">
-                            <img src={product.imageUrl} alt={product.name} className="w-16 h-16 object-cover rounded" />
+                            <img src={product.image} alt={product.name} className="w-16 h-16 object-cover rounded" />
                           </td>
                           <td className="border p-3">
                             <button

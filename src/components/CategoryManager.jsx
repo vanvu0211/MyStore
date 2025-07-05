@@ -15,7 +15,7 @@ function CategoryManager() {
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_URL}/Category`);
+      const response = await fetch(`${API_URL}/Categories`);
       if (!response.ok) throw new Error('Không thể tải danh sách danh mục');
       const data = await response.json();
       setCategories(data);
@@ -32,14 +32,14 @@ function CategoryManager() {
     setLoading(true);
     try {
       if (editId) {
-        await fetch(`${API_URL}/Category/${editId}`, {
+        await fetch(`${API_URL}/Categories/${editId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ id: editId, name }),
         });
         setEditId(null);
       } else {
-        await fetch(`${API_URL}/Category`, {
+        await fetch(`${API_URL}/Categories`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name }),
@@ -66,7 +66,7 @@ function CategoryManager() {
 
     setLoading(true);
     try {
-      await fetch(`${API_URL}/Category/${id}`, {
+      await fetch(`${API_URL}/Categories/${id}`, {
         method: 'DELETE',
       });
       await fetchCategories();
