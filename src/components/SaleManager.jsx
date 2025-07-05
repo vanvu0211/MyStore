@@ -396,7 +396,7 @@ function SaleManager() {
             </div>
 
             {/* Customer */}
-            <div className="mb-2 text-11">
+            <div className="mb-2 text-base">
               <strong>Khách:</strong> {invoiceData.customerName}
             </div>
 
