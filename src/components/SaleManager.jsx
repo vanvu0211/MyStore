@@ -16,6 +16,11 @@ function SaleManager() {
   const [loading, setLoading] = useState(false);
   const [searchInvoiceCode, setSearchInvoiceCode] = useState('');
   const [searchedInvoice, setSearchedInvoice] = useState(null);
+  const [isPriceModalOpen, setIsPriceModalOpen] = useState(false);
+  const [selectedProductId, setSelectedProductId] = useState(null);
+  const [newPrice, setNewPrice] = useState('');
+  const [debtAmount, setDebtAmount] = useState('');
+  const [debtDate, setDebtDate] = useState('');
 
   const componentRef = useRef();
 
@@ -73,6 +78,8 @@ function SaleManager() {
       setCustomerName('');
       setQuantities({});
       setCustomPrices({});
+      setDebtAmount('');
+      setDebtDate('');
     },
   });
 
@@ -89,14 +96,23 @@ function SaleManager() {
   };
 
   const updateCustomPrice = (productId, value) => {
-    let formattedValue = value.replace(/[^0-9]/g, ''); // Remove non-numeric characters
+    let formattedValue = value.replace(/[^0-9]/g, '');
     if (formattedValue === '') {
       setCustomPrices({ ...customPrices, [productId]: '' });
       return;
     }
-    // Format as 100.000
     formattedValue = parseInt(formattedValue).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
     setCustomPrices({ ...customPrices, [productId]: formattedValue });
+  };
+
+  const updateDebtAmount = (value) => {
+    let formattedValue = value.replace(/[^0-9]/g, '');
+    if (formattedValue === '') {
+      setDebtAmount('');
+      return;
+    }
+    formattedValue = parseInt(formattedValue).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    setDebtAmount(formattedValue);
   };
 
   const getRawPrice = (formattedPrice) => {
@@ -108,7 +124,7 @@ function SaleManager() {
     const quantity = inputQuantity === '' || inputQuantity === '0' || !inputQuantity
       ? 1
       : parseInt(inputQuantity);
-    
+
     const inputPrice = customPrices[productToAdd.id];
     const price = inputPrice && getRawPrice(inputPrice) > 0
       ? getRawPrice(inputPrice)
@@ -166,10 +182,13 @@ function SaleManager() {
     setLoading(true);
     try {
       const invoiceCode = generateInvoiceCode();
+      const rawDebtAmount = debtAmount ? getRawPrice(debtAmount) : 0;
       const invoicePayload = {
         customerName,
         invoiceCode,
         saleDate: new Date().toISOString(),
+        debtAmount: rawDebtAmount,
+        debtDate: debtDate || null,
         items: selectedProducts.map((p) => ({
           productName: p.name,
           salePrice: p.price,
@@ -195,6 +214,8 @@ function SaleManager() {
         customerName: savedInvoice.customerName,
         invoiceCode: savedInvoice.invoiceCode,
         saleDate: savedInvoice.saleDate,
+        debtAmount: savedInvoice.debtAmount,
+        debtDate: savedInvoice.debtDate,
         items: savedInvoice.items.map((item) => ({
           id: item.id,
           name: item.productName,
@@ -214,10 +235,50 @@ function SaleManager() {
     }
   };
 
+  const updateProductPrice = async (productId, newPriceValue) => {
+    setLoading(true);
+    try {
+      const rawPrice = getRawPrice(newPriceValue);
+      if (rawPrice <= 0) {
+        throw new Error('Giá phải lớn hơn 0');
+      }
+
+      const response = await fetch(`${API_URL}/Products/${productId}/price`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ price: rawPrice }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Không thể cập nhật giá sản phẩm');
+      }
+
+      await fetchProducts();
+      setError(null);
+      setIsPriceModalOpen(false);
+      setNewPrice('');
+      setSelectedProductId(null);
+    } catch (error) {
+      console.error('Error updating product price:', error);
+      setError(error.message || 'Không thể cập nhật giá sản phẩm');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const groupedProducts = categories.reduce((acc, category) => {
     acc[category.id] = products.filter((product) => product.categoryId === category.id);
     return acc;
   }, {});
+
+  const calculateTotalWithDebt = () => {
+    const productsTotal = selectedProducts.reduce((sum, p) => sum + p.price * p.quantity, 0);
+    const rawDebtAmount = debtAmount ? getRawPrice(debtAmount) : 0;
+    return productsTotal + rawDebtAmount;
+  };
 
   return (
     <div className="p-2 max-w-full bg-gray-50 min-h-screen">
@@ -237,7 +298,7 @@ function SaleManager() {
                 groupedProducts[category.id]?.length > 0 && (
                   <div key={category.id} className="mb-6">
                     <h4 className="text-2xl font-bold text-blue-700 bg-blue-200 mb-4 border-b pb-2 leading-relaxed">{category.name}</h4>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-3">
                       {groupedProducts[category.id].map((product) => (
                         <div key={product.id} className="border rounded-lg shadow-sm bg-white hover:shadow-md transition-all duration-200 hover:scale-105 p-3">
                           <div className="relative">
@@ -254,9 +315,24 @@ function SaleManager() {
                             <h4 className="font-semibold text-gray-900 text-base line-clamp-2 min-h-[2.5rem]">
                               {product.name}
                             </h4>
-                            <p className="text-blue-600 font-bold text-base">
-                              {formatCurrency(product.price)}
-                            </p>
+                            <div className="flex items-center gap-2">
+                              <p className="text-blue-600 font-bold text-base">
+                                {formatCurrency(product.price)}
+                              </p>
+                              <button
+                                onClick={() => {
+                                  setSelectedProductId(product.id);
+                                  setNewPrice(formatCurrency(product.price).replace(' đ', ''));
+                                  setIsPriceModalOpen(true);
+                                }}
+                                className="text-gray-500 hover:text-gray-700"
+                                disabled={loading}
+                              >
+                                <svg className="w-5 h-5 font-bold " fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v.01M12 12v.01M12 18v.01"></path>
+                                </svg>
+                              </button>
+                            </div>
                             <div className="flex flex-col gap-2">
                               <input
                                 type="number"
@@ -344,21 +420,54 @@ function SaleManager() {
               )}
             </div>
             <div className="border-t pt-6">
+              <div className="mb-4 space-y-3">
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={debtAmount}
+                    onChange={(e) => updateDebtAmount(e.target.value)}
+                    placeholder="Số tiền nợ"
+                    className="border border-gray-300 p-2 rounded-md w-full text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    disabled={loading}
+                    onFocus={(e) => e.target.select()}
+                  />
+                  <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500">đ</span>
+                </div>
+                <input
+                  type="text"
+                  value={debtDate}
+                  onChange={(e) => setDebtDate(e.target.value)}
+                  placeholder="Ngày nợ"
+                  className="border border-gray-300 p-2 rounded-md w-full text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  disabled={loading}
+                />
+              </div>
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-base font-medium">Tổng hóa đơn:</span>
+                <span className="text-base font-semibold text-blue-600">
+                  {formatCurrency(selectedProducts.reduce((sum, p) => sum + p.price * p.quantity, 0))}
+                </span>
+              </div>
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-base font-medium">Số tiền nợ:</span>
+                <span className="text-base font-semibold text-blue-600">
+                  {debtAmount ? formatCurrency(getRawPrice(debtAmount)) : formatCurrency(0)}
+                </span>
+              </div>
               <div className="flex justify-between items-center mb-6">
                 <span className="text-xl font-semibold">Tổng cộng:</span>
                 <span className="text-2xl font-bold text-blue-600">
-                  {formatCurrency(selectedProducts.reduce((sum, p) => sum + p.price * p.quantity, 0))}
+                  {formatCurrency(calculateTotalWithDebt())}
                 </span>
               </div>
               <button
                 onClick={prepareAndPrint}
-                className="bg-green-500 text-white py-3 rounded-md w-full text-base font-medium hover:bg-green-600 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                className="bg-blue-500 text-white py-3 rounded-md w-full text-base font-medium hover:bg-blue-600 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
                 disabled={!customerName || selectedProducts.length === 0 || loading}
               >
                 {loading ? 'Đang xử lý...' : 'Xuất hóa đơn'}
               </button>
             </div>
-            {/* Invoice Search Section */}
             <div className="mt-6 border-t pt-4">
               <h4 className="text-lg font-semibold mb-4">Tìm kiếm hóa đơn</h4>
               <div className="flex gap-2">
@@ -384,6 +493,10 @@ function SaleManager() {
                   <p><strong>Mã hóa đơn:</strong> {searchedInvoice.invoiceCode}</p>
                   <p><strong>Khách hàng:</strong> {searchedInvoice.customerName}</p>
                   <p><strong>Ngày bán:</strong> {new Date(searchedInvoice.saleDate).toLocaleDateString('vi-VN')}</p>
+                  <p><strong>Số tiền nợ:</strong> {formatCurrency(searchedInvoice.debtAmount || 0)}</p>
+                  {searchedInvoice.debtDate && (
+                    <p><strong>Ngày nợ:</strong> {new Date(searchedInvoice.debtDate).toLocaleDateString('vi-VN')}</p>
+                  )}
                   <p><strong>Sản phẩm:</strong></p>
                   <ul className="list-disc pl-5">
                     {searchedInvoice.items.map((item, index) => (
@@ -400,7 +513,59 @@ function SaleManager() {
         </div>
       )}
 
-      {/* Printable Invoice Section */}
+      {isPriceModalOpen && (
+        <div className="fixed inset-0 bg-gray-300/50 bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h3 className="text-xl font-semibold text-gray-900 mb-4">Cập nhật giá sản phẩm</h3>
+            <p className="text-gray-600 mb-4">
+              Sản phẩm: {products.find((p) => p.id === selectedProductId)?.name}
+            </p>
+            <div className="relative mb-4">
+              <input
+                type="text"
+                value={newPrice}
+                onChange={(e) => {
+                  let value = e.target.value.replace(/[^0-9]/g, '');
+                  if (value === '') {
+                    setNewPrice('');
+                    return;
+                  }
+                  value = parseInt(value).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                  setNewPrice(value);
+                }}
+                placeholder="Nhập giá mới"
+                className="border border-gray-300 p-2 rounded-md w-full text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                disabled={loading}
+                onFocus={(e) => e.target.select()}
+              />
+              <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500">đ</span>
+            </div>
+            {error && <p className="text-red-500 mb-4 text-base">{error}</p>}
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => {
+                  setIsPriceModalOpen(false);
+                  setNewPrice('');
+                  setSelectedProductId(null);
+                  setError(null);
+                }}
+                className="bg-gray-300 text-gray-900 py-2 px-4 rounded-md text-base font-medium hover:bg-gray-400 transition-colors duration-200"
+                disabled={loading}
+              >
+                Hủy
+              </button>
+              <button
+                onClick={() => updateProductPrice(selectedProductId, newPrice)}
+                className="bg-blue-500 text-white py-2 px-4 rounded-md text-base font-medium hover:bg-blue-600 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                disabled={loading || !newPrice}
+              >
+                {loading ? 'Đang cập nhật...' : 'Cập nhật'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {invoiceData && (
         <div className="hidden print:block">
           <div
@@ -408,15 +573,12 @@ function SaleManager() {
             className="w-80 p-2 text-sm font-sans bg-white text-black"
             style={{ width: '80mm', padding: '2mm' }}
           >
-            {/* Header */}
             <div className="text-center mb-2.5">
               <div className="font-bold text-base">Tạp hóa Văn Bằng</div>
               <div className="text-11 leading-tight">
                 0966900544 - Thôn 5, Quảng Tín, Đắk R Lấp
               </div>
             </div>
-
-            {/* Invoice Title */}
             <div className="text-center my-2.5">
               <div className="font-bold text-14">HÓA ĐƠN TẠM TÍNH</div>
               <div className="text-11">Mã hóa đơn: {invoiceData.invoiceCode}</div>
@@ -430,13 +592,9 @@ function SaleManager() {
                 })}
               </div>
             </div>
-
-            {/* Customer */}
             <div className="mb-2 text-base">
               <strong>Khách:</strong> {invoiceData.customerName}
             </div>
-
-            {/* Products Table */}
             <table className="w-full border-collapse text-11 mb-2">
               <thead>
                 <tr className="border-b border-black">
@@ -463,16 +621,33 @@ function SaleManager() {
                 ))}
               </tbody>
             </table>
-
-            {/* Total */}
             <div className="border-t border-black pt-1.5 mb-2.5 text-left text-12">
-              <div>Tổng {invoiceData.items.reduce((sum, p) => sum + p.quantity, 0)} sản phẩm</div>
+              <div>
+                Tổng: <span className="font-semibold">
+                  {invoiceData.items.reduce((sum, p) => sum + p.quantity, 0)} sản phẩm
+                </span>
+              </div>
+
+              <div className="text-sm font-semibold mt-0.5">
+                <div>
+                  <span className="font-normal">Tổng hóa đơn:</span>{' '}
+                  {formatCurrency(invoiceData.items.reduce((sum, p) => sum + p.price * p.quantity, 0))}
+                </div>
+
+                {debtAmount !== '' && (
+                  <div>
+                    <span className="font-normal">Tiền nợ:</span>{' '}
+                    {debtAmount} - <span className="italic">{debtDate}</span>
+                  </div>
+                )}
+              </div>
+
+
               <div className="text-base font-semibold mt-0.5">
-                Tiền thanh toán: {formatCurrency(invoiceData.total)}
+
+                <div>Tiền thanh toán: {formatCurrency(calculateTotalWithDebt())}</div>
               </div>
             </div>
-
-            {/* QR Code Section */}
             <div className="my-2.5 text-11">
               <div className="border-t border-black mb-2"></div>
               <div className="flex items-center justify-between">
@@ -486,15 +661,17 @@ function SaleManager() {
                   className="text-sm leading-tight text-right font-semibold mr-5mm"
                   style={{ marginRight: '5mm' }}
                 >
-                  <div>OCB PHƯƠNG ĐÔNG</div>
-                  <div>NGUYEN VAN VU</div>
-                  <div>12345678910</div>
+                  <div>LB Bank</div>
+                  <div>THAI THI LIEU</div>
+                  <div>3377226666</div>
                 </div>
               </div>
             </div>
           </div>
         </div>
       )}
+
+
     </div>
   );
 }
