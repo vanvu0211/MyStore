@@ -11,6 +11,7 @@ function SaleManager() {
   const [customerName, setCustomerName] = useState('');
   const [invoiceData, setInvoiceData] = useState(null);
   const [quantities, setQuantities] = useState({});
+  const [customPrices, setCustomPrices] = useState({});
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [searchInvoiceCode, setSearchInvoiceCode] = useState('');
@@ -71,6 +72,7 @@ function SaleManager() {
       setSelectedProducts([]);
       setCustomerName('');
       setQuantities({});
+      setCustomPrices({});
     },
   });
 
@@ -86,25 +88,48 @@ function SaleManager() {
     }
   };
 
+  const updateCustomPrice = (productId, value) => {
+    let formattedValue = value.replace(/[^0-9]/g, ''); // Remove non-numeric characters
+    if (formattedValue === '') {
+      setCustomPrices({ ...customPrices, [productId]: '' });
+      return;
+    }
+    // Format as 100.000
+    formattedValue = parseInt(formattedValue).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    setCustomPrices({ ...customPrices, [productId]: formattedValue });
+  };
+
+  const getRawPrice = (formattedPrice) => {
+    return parseFloat(formattedPrice.replace(/\./g, '')) || 0;
+  };
+
   const addProduct = (productToAdd) => {
     const inputQuantity = quantities[productToAdd.id];
     const quantity = inputQuantity === '' || inputQuantity === '0' || !inputQuantity
       ? 1
       : parseInt(inputQuantity);
+    
+    const inputPrice = customPrices[productToAdd.id];
+    const price = inputPrice && getRawPrice(inputPrice) > 0
+      ? getRawPrice(inputPrice)
+      : productToAdd.price;
 
     const existingProduct = selectedProducts.find((p) => p.id === productToAdd.id);
 
     if (existingProduct) {
       setSelectedProducts(
         selectedProducts.map((p) =>
-          p.id === productToAdd.id ? { ...p, quantity: p.quantity + quantity } : p
+          p.id === productToAdd.id
+            ? { ...p, quantity: p.quantity + quantity, price }
+            : p
         )
       );
     } else {
-      setSelectedProducts([...selectedProducts, { ...productToAdd, quantity }]);
+      setSelectedProducts([...selectedProducts, { ...productToAdd, quantity, price }]);
     }
 
     setQuantities({ ...quantities, [productToAdd.id]: '' });
+    setCustomPrices({ ...customPrices, [productToAdd.id]: '' });
   };
 
   const removeProduct = (id) => {
@@ -243,6 +268,18 @@ function SaleManager() {
                                 disabled={loading}
                                 onFocus={(e) => e.target.select()}
                               />
+                              <div className="relative">
+                                <input
+                                  type="text"
+                                  value={customPrices[product.id] || ''}
+                                  onChange={(e) => updateCustomPrice(product.id, e.target.value)}
+                                  placeholder="Giá tùy chỉnh"
+                                  className="border border-gray-300 p-2 rounded-md w-full text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                  disabled={loading}
+                                  onFocus={(e) => e.target.select()}
+                                />
+                                <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500">đ</span>
+                              </div>
                               <button
                                 onClick={() => addProduct(product)}
                                 className="bg-blue-500 text-white py-2 px-3 rounded-md text-base font-medium hover:bg-blue-600 transition-colors duration-200 active:transform active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed"
@@ -269,7 +306,6 @@ function SaleManager() {
               onChange={(e) => setCustomerName(e.target.value)}
               placeholder="Tên khách hàng"
               className="border border-gray-300 p-3 rounded-md mb-6 w-full text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              required
               disabled={loading}
             />
             <div className="max-h-96 overflow-y-auto mb-6">
