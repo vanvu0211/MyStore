@@ -637,7 +637,7 @@ function SaleManager() {
                 {debtAmount !== '' && (
                   <div>
                     <span className="font-normal">Tiền nợ:</span>{' '}
-                    {debtAmount} - <span className="italic">{debtDate}</span>
+                    {debtAmount+"đ"} - <span className="italic">{debtDate}</span>
                   </div>
                 )}
               </div>
