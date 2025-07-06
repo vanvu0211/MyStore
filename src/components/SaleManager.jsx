@@ -24,7 +24,7 @@ function SaleManager() {
 
   const componentRef = useRef();
   const cartRef = useRef();
-  const categoryRefs = useRef({}); // Refs for category sections
+  const categoryRefs = useRef({});
 
   useEffect(() => {
     fetchData();
@@ -309,20 +309,22 @@ function SaleManager() {
       ) : (
         <div className="flex gap-4">
           <div className="flex-1 pr-2">
-            <h3 className="text-2xl font-semibold text-gray-900 mb-4 leading-relaxed">Danh sách hàng hóa</h3>
-            <div className="flex flex-wrap gap-2 mb-6">
-              {categories.map((category) => (
-                groupedProducts[category.id]?.length > 0 && (
-                  <button
-                    key={category.id}
-                    onClick={() => scrollToCategory(category.id)}
-                    className="bg-blue-500 text-white py-2 px-4 rounded-md text-base font-medium hover:bg-blue-600 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                    disabled={loading}
-                  >
-                    {category.name}
-                  </button>
-                )
-              ))}
+            <div className="sticky top-0 bg-gray-50 z-10 pt-2">
+              <h3 className="text-2xl font-semibold text-gray-900 mb-4 leading-relaxed">Danh sách hàng hóa</h3>
+              <div className="flex flex-wrap gap-2 mb-4">
+                {categories.map((category) => (
+                  groupedProducts[category.id]?.length > 0 && (
+                    <button
+                      key={category.id}
+                      onClick={() => scrollToCategory(category.id)}
+                      className="bg-blue-500 text-white py-2 px-4 rounded-md text-base font-medium hover:bg-blue-600 transition-colors duration-200 disabled:bg-gray-posite-400 disabled:cursor-not-allowed"
+                      disabled={loading}
+                    >
+                      {category.name}
+                    </button>
+                  )
+                ))}
+              </div>
             </div>
             {categories.length === 0 && products.length === 0 ? (
               <p className="text-gray-600 text-base leading-relaxed">Không có sản phẩm hoặc danh mục nào để hiển thị</p>
