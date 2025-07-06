@@ -23,7 +23,6 @@ function SaleManager() {
   const [debtDate, setDebtDate] = useState('');
 
   const componentRef = useRef();
-  const cartRef = useRef(); // Add a ref for the cart container
 
   useEffect(() => {
     fetchData();
@@ -54,13 +53,13 @@ function SaleManager() {
   const fetchCategories = async () => {
     try {
       const response = await fetch(`${API_URL}/Categories`);
-      if (!response.ok) throw new Error('Không thể tải danh mục');
+      if (!response.ok) throw new Error('Không thể tải danh sách danh mục');
       const data = await response.json();
       setCategories(data);
       setError(null);
     } catch (error) {
       console.error('Error fetching categories:', error);
-      setError('Không thể tải danh mục');
+      setError('Không thể tải danh sách danh mục');
     }
   };
 
@@ -131,34 +130,22 @@ function SaleManager() {
       ? getRawPrice(inputPrice)
       : productToAdd.price;
 
-    const existingProductIndex = selectedProducts.findIndex((p) => p.id === productToAdd.id);
-    let updatedProducts;
+    const existingProduct = selectedProducts.find((p) => p.id === productToAdd.id);
 
-    if (existingProductIndex >= 0) {
-      updatedProducts = selectedProducts.map((p, index) =>
-        index === existingProductIndex
-          ? { ...p, quantity: p.quantity + quantity, price }
-          : p
+    if (existingProduct) {
+      setSelectedProducts(
+        selectedProducts.map((p) =>
+          p.id === productToAdd.id
+            ? { ...p, quantity: p.quantity + quantity, price }
+            : p
+        )
       );
     } else {
-      updatedProducts = [...selectedProducts, { ...productToAdd, quantity, price }];
+      setSelectedProducts([...selectedProducts, { ...productToAdd, quantity, price }]);
     }
 
-    setSelectedProducts(updatedProducts);
     setQuantities({ ...quantities, [productToAdd.id]: '' });
     setCustomPrices({ ...customPrices, [productToAdd.id]: '' });
-
-    // Scroll to the newly added or updated product
-    setTimeout(() => {
-      if (cartRef.current) {
-        const productElements = cartRef.current.querySelectorAll('.cart-item');
-        const targetIndex = existingProductIndex >= 0 ? existingProductIndex : updatedProducts.length - 1;
-        const targetElement = productElements[targetIndex];
-        if (targetElement) {
-          targetElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
-      }
-    }, 0);
   };
 
   const removeProduct = (id) => {
@@ -167,7 +154,7 @@ function SaleManager() {
 
   const fetchInvoiceByCode = async () => {
     if (!searchInvoiceCode) {
-      setError('Vui lòng nhập mã hóa đơn');
+      setError('Vui lòng nhập mã hóa đơn để tìm kiếm');
       return;
     }
     setLoading(true);
@@ -175,10 +162,11 @@ function SaleManager() {
       const response = await fetch(`${API_URL}/Invoices/by-code/${searchInvoiceCode}`);
       if (!response.ok) throw new Error('Không tìm thấy hóa đơn');
       const data = await response.json();
+      setSearchedInvoice(data);
       setError(null);
     } catch (error) {
       console.error('Error fetching invoice:', error);
-      setError('Không tìm thấy hóa đơn');
+      setError('Không tìm thấy hóa đơn hoặc có lỗi xảy ra');
       setSearchedInvoice(null);
     } finally {
       setLoading(false);
@@ -265,7 +253,7 @@ function SaleManager() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Không thể cập nhật giá');
+        throw new Error(errorData.message || 'Không thể cập nhật giá sản phẩm');
       }
 
       await fetchProducts();
@@ -275,7 +263,7 @@ function SaleManager() {
       setSelectedProductId(null);
     } catch (error) {
       console.error('Error updating product price:', error);
-      setError(error.message || 'Không thể cập nhật giá');
+      setError(error.message || 'Không thể cập nhật giá sản phẩm');
     } finally {
       setLoading(false);
     }
@@ -304,7 +292,7 @@ function SaleManager() {
           <div className="flex-1 pr-2">
             <h3 className="text-2xl font-semibold text-gray-900 mb-6 leading-relaxed">Danh sách hàng hóa</h3>
             {categories.length === 0 && products.length === 0 ? (
-              <p className="text-gray-600 text-base leading-relaxed">Không có sản phẩm hoặc danh mục</p>
+              <p className="text-gray-600 text-base leading-relaxed">Không có sản phẩm hoặc danh mục nào để hiển thị</p>
             ) : (
               categories.map((category) => (
                 groupedProducts[category.id]?.length > 0 && (
@@ -340,7 +328,7 @@ function SaleManager() {
                                 className="text-gray-500 hover:text-gray-700"
                                 disabled={loading}
                               >
-                                <svg className="w-5 h-5 font-bold" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <svg className="w-5 h-5 font-bold " fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v.01M12 12v.01M12 18v.01"></path>
                                 </svg>
                               </button>
@@ -396,7 +384,7 @@ function SaleManager() {
               className="border border-gray-300 p-3 rounded-md mb-6 w-full text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               disabled={loading}
             />
-            <div className="max-h-96 overflow-y-auto mb-6" ref={cartRef}>
+            <div className="max-h-96 overflow-y-auto mb-6">
               {selectedProducts.length === 0 ? (
                 <div className="text-center py-8 text-gray-500 text-base leading-relaxed">
                   <p>Giỏ hàng trống</p>
@@ -404,7 +392,7 @@ function SaleManager() {
               ) : (
                 <div className="space-y-3">
                   {selectedProducts.map((product, index) => (
-                    <div key={product.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-md cart-item">
+                    <div key={product.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-md">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           <span className="text-base text-gray-900 font-medium">{index + 1}. {product.name}</span>
@@ -639,19 +627,24 @@ function SaleManager() {
                   {invoiceData.items.reduce((sum, p) => sum + p.quantity, 0)} sản phẩm
                 </span>
               </div>
+
               <div className="text-sm font-semibold mt-0.5">
                 <div>
                   <span className="font-normal">Tổng hóa đơn:</span>{' '}
                   {formatCurrency(invoiceData.items.reduce((sum, p) => sum + p.price * p.quantity, 0))}
                 </div>
+
                 {debtAmount !== '' && (
                   <div>
                     <span className="font-normal">Tiền nợ:</span>{' '}
-                    {debtAmount + "đ"} - <span className="italic">{debtDate}</span>
+                    {debtAmount+"đ"} - <span className="italic">{debtDate}</span>
                   </div>
                 )}
               </div>
+
+
               <div className="text-base font-semibold mt-0.5">
+
                 <div>Tiền thanh toán: {formatCurrency(calculateTotalWithDebt())}</div>
               </div>
             </div>
@@ -677,6 +670,8 @@ function SaleManager() {
           </div>
         </div>
       )}
+
+
     </div>
   );
 }
