@@ -76,14 +76,14 @@ function ProductManager() {
       return;
     }
 
-    const maxSizeBeforeCompression = 300 * 1024; // 300KB
+    const maxSizeBeforeCompression = 10 * 1024; // 300KB
     if (file.size > maxSizeBeforeCompression) {
       try {
         const options = {
-          maxSizeMB: 0.3,
-          maxWidthOrHeight: 1920,
+          maxSizeMB: 0.01,
+          maxWidthOrHeight: 800,
           useWebWorker: true,
-          initialQuality: 0.9,
+          initialQuality: 0.8,
         };
         const compressedFile = await imageCompression(file, options);
         setImageFile(compressedFile);
