@@ -81,7 +81,7 @@ function ProductManager() {
       try {
         const options = {
           maxSizeMB: 0.015,
-          maxWidthOrHeight: 800,
+          maxWidthOrHeight: 255,
           useWebWorker: true,
           initialQuality: 0.9,
         };
