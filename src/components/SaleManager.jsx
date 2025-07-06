@@ -23,7 +23,8 @@ function SaleManager() {
   const [debtDate, setDebtDate] = useState('');
 
   const componentRef = useRef();
-  const cartRef = useRef(); // Add ref for cart container
+  const cartRef = useRef();
+  const categoryRefs = useRef({}); // Refs for category sections
 
   useEffect(() => {
     fetchData();
@@ -148,7 +149,6 @@ function SaleManager() {
     setQuantities({ ...quantities, [productToAdd.id]: '' });
     setCustomPrices({ ...customPrices, [productToAdd.id]: '' });
 
-    // Scroll to the newly added or updated product
     setTimeout(() => {
       if (cartRef.current) {
         const productElements = cartRef.current.querySelectorAll('.cart-item');
@@ -293,6 +293,12 @@ function SaleManager() {
     return productsTotal + rawDebtAmount;
   };
 
+  const scrollToCategory = (categoryId) => {
+    if (categoryRefs.current[categoryId]) {
+      categoryRefs.current[categoryId].scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   return (
     <div className="p-2 max-w-full bg-gray-50 min-h-screen">
       {error && <p className="text-red-500 mb-6 px-2 text-base leading-relaxed">{error}</p>}
@@ -303,13 +309,31 @@ function SaleManager() {
       ) : (
         <div className="flex gap-4">
           <div className="flex-1 pr-2">
-            <h3 className="text-2xl font-semibold text-gray-900 mb-6 leading-relaxed">Danh sách hàng hóa</h3>
+            <h3 className="text-2xl font-semibold text-gray-900 mb-4 leading-relaxed">Danh sách hàng hóa</h3>
+            <div className="flex flex-wrap gap-2 mb-6">
+              {categories.map((category) => (
+                groupedProducts[category.id]?.length > 0 && (
+                  <button
+                    key={category.id}
+                    onClick={() => scrollToCategory(category.id)}
+                    className="bg-blue-500 text-white py-2 px-4 rounded-md text-base font-medium hover:bg-blue-600 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    disabled={loading}
+                  >
+                    {category.name}
+                  </button>
+                )
+              ))}
+            </div>
             {categories.length === 0 && products.length === 0 ? (
               <p className="text-gray-600 text-base leading-relaxed">Không có sản phẩm hoặc danh mục nào để hiển thị</p>
             ) : (
               categories.map((category) => (
                 groupedProducts[category.id]?.length > 0 && (
-                  <div key={category.id} className="mb-6">
+                  <div
+                    key={category.id}
+                    ref={(el) => (categoryRefs.current[category.id] = el)}
+                    className="mb-6"
+                  >
                     <h4 className="text-2xl font-bold text-blue-700 bg-blue-200 mb-4 border-b pb-2 leading-relaxed">{category.name}</h4>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-3">
                       {groupedProducts[category.id].map((product) => (
@@ -640,24 +664,19 @@ function SaleManager() {
                   {invoiceData.items.reduce((sum, p) => sum + p.quantity, 0)} sản phẩm
                 </span>
               </div>
-
               <div className="text-sm font-semibold mt-0.5">
                 <div>
                   <span className="font-normal">Tổng hóa đơn:</span>{' '}
                   {formatCurrency(invoiceData.items.reduce((sum, p) => sum + p.price * p.quantity, 0))}
                 </div>
-
                 {debtAmount !== '' && (
                   <div>
                     <span className="font-normal">Tiền nợ:</span>{' '}
-                    {debtAmount+"đ"} - <span className="italic">{debtDate}</span>
+                    {debtAmount + "đ"} - <span className="italic">{debtDate}</span>
                   </div>
                 )}
               </div>
-
-
               <div className="text-base font-semibold mt-0.5">
-
                 <div>Tiền thanh toán: {formatCurrency(calculateTotalWithDebt())}</div>
               </div>
             </div>
