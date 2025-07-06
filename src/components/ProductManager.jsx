@@ -76,11 +76,11 @@ function ProductManager() {
       return;
     }
 
-    const maxSizeBeforeCompression = 10 * 1024; // 300KB
+    const maxSizeBeforeCompression = 15 * 1024; // 300KB
     if (file.size > maxSizeBeforeCompression) {
       try {
         const options = {
-          maxSizeMB: 0.01,
+          maxSizeMB: 0.015,
           maxWidthOrHeight: 800,
           useWebWorker: true,
           initialQuality: 0.9,
