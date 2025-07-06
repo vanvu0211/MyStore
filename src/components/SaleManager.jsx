@@ -1,8 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import { API_URL } from '../config';
-import { formatCurrency } from '../utils/utils';
 import qrBankImage from '../assets/qr_bank.png';
+
+// Fallback formatCurrency implementation (remove if already defined in ../utils/utils)
+const formatCurrency = (value) => {
+  if (!value || isNaN(value)) return '0 đ';
+  return `${parseInt(value).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')} đ`;
+};
 
 function SaleManager() {
   const [products, setProducts] = useState([]);
@@ -21,10 +26,11 @@ function SaleManager() {
   const [newPrice, setNewPrice] = useState('');
   const [debtAmount, setDebtAmount] = useState('');
   const [debtDate, setDebtDate] = useState('');
+  const [selectedCategoryId, setSelectedCategoryId] = useState(null);
 
   const componentRef = useRef();
   const cartRef = useRef();
-  const categoryRefs = useRef({});
+  const categoryRef = useRef(null);
 
   useEffect(() => {
     fetchData();
@@ -33,22 +39,12 @@ function SaleManager() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      await Promise.all([fetchProducts(), fetchCategories()]);
+      await fetchCategories();
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      setError('Không thể tải dữ liệu');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const fetchProducts = async () => {
-    try {
-      const response = await fetch(`${API_URL}/Products`);
-      if (!response.ok) throw new Error('Không thể tải danh sách sản phẩm');
-      const data = await response.json();
-      setProducts(data);
-      setError(null);
-    } catch (error) {
-      console.error('Error fetching products:', error);
-      setError('Không thể tải danh sách sản phẩm');
     }
   };
 
@@ -57,11 +53,40 @@ function SaleManager() {
       const response = await fetch(`${API_URL}/Categories`);
       if (!response.ok) throw new Error('Không thể tải danh sách danh mục');
       const data = await response.json();
+      if (!Array.isArray(data) || data.length === 0) {
+        throw new Error('Danh sách danh mục trống');
+      }
       setCategories(data);
+      const defaultCategory = data.find(category => category.name.toLowerCase() === 'mì tôm') || data[0];
+      if (defaultCategory) {
+        setSelectedCategoryId(defaultCategory.id);
+        await fetchProducts(defaultCategory.id);
+      }
       setError(null);
     } catch (error) {
       console.error('Error fetching categories:', error);
       setError('Không thể tải danh sách danh mục');
+    }
+  };
+
+  const fetchProducts = async (categoryId) => {
+    if (!categoryId) {
+      setError('Không có danh mục được chọn');
+      return;
+    }
+    try {
+      const response = await fetch(`${API_URL}/Products/category/${categoryId}`);
+      if (!response.ok) throw new Error('Không thể tải danh sách sản phẩm');
+      const data = await response.json();
+      if (!Array.isArray(data)) {
+        throw new Error('Dữ liệu sản phẩm không hợp lệ');
+      }
+      setProducts(data);
+      setError(null);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      setError('Không thể tải danh sách sản phẩm');
+      setProducts([]);
     }
   };
 
@@ -122,6 +147,7 @@ function SaleManager() {
   };
 
   const addProduct = (productToAdd) => {
+    if (!productToAdd) return;
     const inputQuantity = quantities[productToAdd.id];
     const quantity = inputQuantity === '' || inputQuantity === '0' || !inputQuantity
       ? 1
@@ -148,18 +174,18 @@ function SaleManager() {
     setSelectedProducts(updatedProducts);
     setQuantities({ ...quantities, [productToAdd.id]: '' });
     setCustomPrices({ ...customPrices, [productToAdd.id]: '' });
-
-    setTimeout(() => {
-      if (cartRef.current) {
-        const productElements = cartRef.current.querySelectorAll('.cart-item');
-        const targetIndex = existingProductIndex >= 0 ? existingProductIndex : updatedProducts.length - 1;
-        const targetElement = productElements[targetIndex];
-        if (targetElement) {
-          targetElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
-      }
-    }, 0);
   };
+
+  useEffect(() => {
+    if (cartRef.current && selectedProducts.length > 0) {
+      const productElements = cartRef.current.querySelectorAll('.cart-item');
+      const targetIndex = selectedProducts.length - 1;
+      const targetElement = productElements[targetIndex];
+      if (targetElement) {
+        targetElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+  }, [selectedProducts]);
 
   const removeProduct = (id) => {
     setSelectedProducts(selectedProducts.filter((p) => p.id !== id));
@@ -219,7 +245,7 @@ function SaleManager() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData || 'Không thể tạo hóa đơn');
+        throw new Error(errorData.message || 'Không thể tạo hóa đơn');
       }
 
       const savedInvoice = await response.json();
@@ -269,7 +295,9 @@ function SaleManager() {
         throw new Error(errorData.message || 'Không thể cập nhật giá sản phẩm');
       }
 
-      await fetchProducts();
+      if (selectedCategoryId) {
+        await fetchProducts(selectedCategoryId);
+      }
       setError(null);
       setIsPriceModalOpen(false);
       setNewPrice('');
@@ -282,20 +310,27 @@ function SaleManager() {
     }
   };
 
-  const groupedProducts = categories.reduce((acc, category) => {
-    acc[category.id] = products.filter((product) => product.categoryId === category.id);
-    return acc;
-  }, {});
-
   const calculateTotalWithDebt = () => {
     const productsTotal = selectedProducts.reduce((sum, p) => sum + p.price * p.quantity, 0);
     const rawDebtAmount = debtAmount ? getRawPrice(debtAmount) : 0;
     return productsTotal + rawDebtAmount;
   };
 
-  const scrollToCategory = (categoryId) => {
-    if (categoryRefs.current[categoryId]) {
-      categoryRefs.current[categoryId].scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const scrollToCategory = async (categoryId) => {
+    if (!categoryId) return;
+    setLoading(true);
+    setSelectedCategoryId(categoryId);
+    try {
+      await fetchProducts(categoryId);
+      if (categoryRef.current) {
+        categoryRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      setError(null);
+    } catch (error) {
+      console.error('Error fetching products for category:', error);
+      setError('Không thể tải sản phẩm cho danh mục này');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -313,103 +348,105 @@ function SaleManager() {
               <h3 className="text-2xl font-semibold text-gray-900 mb-4 leading-relaxed">Danh sách hàng hóa</h3>
               <div className="flex flex-wrap gap-2 mb-4">
                 {categories.map((category) => (
-                  groupedProducts[category.id]?.length > 0 && (
-                    <button
-                      key={category.id}
-                      onClick={() => scrollToCategory(category.id)}
-                      className="bg-blue-500 text-white py-2 px-4 rounded-md text-base font-medium hover:bg-blue-600 transition-colors duration-200 disabled:bg-gray-posite-400 disabled:cursor-not-allowed"
-                      disabled={loading}
-                    >
-                      {category.name}
-                    </button>
-                  )
+                  <button
+                    key={category.id}
+                    onClick={() => scrollToCategory(category.id)}
+                    className={`py-2 px-4 rounded-md text-base font-medium transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed ${
+                      selectedCategoryId === category.id ? 'bg-blue-900 text-white' : 'bg-blue-400 text-white hover:bg-blue-600'
+                    }`}
+                    disabled={loading}
+                  >
+                    {category.name}
+                  </button>
                 ))}
               </div>
             </div>
-            {categories.length === 0 && products.length === 0 ? (
-              <p className="text-gray-600 text-base leading-relaxed">Không có sản phẩm hoặc danh mục nào để hiển thị</p>
+            {categories.length === 0 ? (
+              <p className="text-gray-600 text-base leading-relaxed">Không có danh mục nào để hiển thị</p>
+            ) : !selectedCategoryId ? (
+              <p className="text-gray-600 text-base leading-relaxed">Vui lòng chọn một danh mục</p>
             ) : (
-              categories.map((category) => (
-                groupedProducts[category.id]?.length > 0 && (
-                  <div
-                    key={category.id}
-                    ref={(el) => (categoryRefs.current[category.id] = el)}
-                    className="mb-6"
-                  >
-                    <h4 className="text-2xl font-bold text-blue-700 bg-blue-200 mb-4 border-b pb-2 leading-relaxed">{category.name}</h4>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-3">
-                      {groupedProducts[category.id].map((product) => (
-                        <div key={product.id} className="border rounded-lg shadow-sm bg-white hover:shadow-md transition-all duration-200 hover:scale-105 p-3">
-                          <div className="relative">
-                            <img
-                              src={product.image}
-                              alt={product.name}
-                              className="w-full h-32 object-cover mb-3 rounded-md"
-                              onError={(e) => {
-                                e.target.style.display = 'none';
+              <div ref={categoryRef} className="mb-6">
+                <h4 className="text-2xl font-bold text-blue-700 bg-blue-200 mb-4 border-b pb-2 leading-relaxed">
+                  {categories.find(c => c.id === selectedCategoryId)?.name || 'Danh mục'}
+                </h4>
+                {products.length === 0 ? (
+                  <p className="text-gray-600 text-base leading-relaxed">Không có sản phẩm nào trong danh mục này</p>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-3">
+                    {products.map((product) => (
+                      <div key={product.id} className="border rounded-lg shadow-sm bg-white hover:shadow-md transition-all duration-200 hover:scale-105 p-3">
+                        <div className="relative">
+                          <img
+                            src={product.image}
+                            alt={product.name}
+                            className="w-full h-32 object-cover mb-3 rounded-md"
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                            }}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <h4 className="font-semibold text-gray-900 text-base line-clamp-2 min-h-[2.5rem]">
+                            {product.name}
+                          </h4>
+                          <div className="flex items-center gap-2">
+                            <p className="text-blue-600 font-bold text-base">
+                              {formatCurrency(product.price)}
+                            </p>
+                            <button
+                              onClick={() => {
+                                setSelectedProductId(product.id);
+                                setNewPrice(formatCurrency(product.price).replace(' đ', ''));
+                                setIsPriceModalOpen(true);
                               }}
-                            />
+                              className="text-gray-500 hover:text-gray-700"
+                              disabled={loading}
+                            >
+                              <svg className="w-5 h-5 font-bold" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v.01M12 12v.01M12 18v.01"></path>
+                              </svg>
+                            </button>
                           </div>
-                          <div className="space-y-2">
-                            <h4 className="font-semibold text-gray-900 text-base line-clamp-2 min-h-[2.5rem]">
-                              {product.name}
-                            </h4>
-                            <div className="flex items-center gap-2">
-                              <p className="text-blue-600 font-bold text-base">
-                                {formatCurrency(product.price)}
-                              </p>
-                              <button
-                                onClick={() => {
-                                  setSelectedProductId(product.id);
-                                  setNewPrice(formatCurrency(product.price).replace(' đ', ''));
-                                  setIsPriceModalOpen(true);
-                                }}
-                                className="text-gray-500 hover:text-gray-700"
-                                disabled={loading}
-                              >
-                                <svg className="w-5 h-5 font-bold" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v.01M12 12v.01M12 18v.01"></path>
-                                </svg>
-                              </button>
-                            </div>
-                            <div className="flex flex-col gap-2">
+                          <div className="flex flex-col gap-2">
+                            <input
+                              type="number"
+                              min="1"
+                              value={quantities[product.id] || ''}
+                              onChange={(e) => updateQuantity(product.id, e.target.value)}
+                              placeholder="Số lượng"
+                              className="border border-gray-300 p-2 rounded-md w-full text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              disabled={loading}
+                              onFocus={(e) => e.target.select()}
+                              aria-label={`Số lượng cho ${product.name}`}
+                            />
+                            <div className="relative">
                               <input
-                                type="number"
-                                min="1"
-                                value={quantities[product.id] || ''}
-                                onChange={(e) => updateQuantity(product.id, e.target.value)}
-                                placeholder="Số lượng"
+                                type="text"
+                                value={customPrices[product.id] || ''}
+                                onChange={(e) => updateCustomPrice(product.id, e.target.value)}
+                                placeholder="Giá tùy chỉnh"
                                 className="border border-gray-300 p-2 rounded-md w-full text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 disabled={loading}
                                 onFocus={(e) => e.target.select()}
+                                aria-label={`Giá tùy chỉnh cho ${product.name}`}
                               />
-                              <div className="relative">
-                                <input
-                                  type="text"
-                                  value={customPrices[product.id] || ''}
-                                  onChange={(e) => updateCustomPrice(product.id, e.target.value)}
-                                  placeholder="Giá tùy chỉnh"
-                                  className="border border-gray-300 p-2 rounded-md w-full text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                  disabled={loading}
-                                  onFocus={(e) => e.target.select()}
-                                />
-                                <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500">đ</span>
-                              </div>
-                              <button
-                                onClick={() => addProduct(product)}
-                                className="bg-blue-500 text-white py-2 px-3 rounded-md text-base font-medium hover:bg-blue-600 transition-colors duration-200 active:transform active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                                disabled={loading}
-                              >
-                                {loading ? 'Đang xử lý...' : 'Thêm vào giỏ'}
-                              </button>
+                              <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500">đ</span>
                             </div>
+                            <button
+                              onClick={() => addProduct(product)}
+                              className="bg-blue-500 text-white py-2 px-3 rounded-md text-base font-medium hover:bg-blue-600 transition-colors duration-200 active:transform active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                              disabled={loading}
+                            >
+                              {loading ? 'Đang xử lý...' : 'Thêm vào giỏ'}
+                            </button>
                           </div>
                         </div>
-                      ))}
-                    </div>
+                      </div>
+                    ))}
                   </div>
-                )
-              ))
+                )}
+              </div>
             )}
           </div>
 
@@ -422,6 +459,7 @@ function SaleManager() {
               placeholder="Tên khách hàng"
               className="border border-gray-300 p-3 rounded-md mb-6 w-full text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               disabled={loading}
+              aria-label="Tên khách hàng"
             />
             <div className="max-h-96 overflow-y-auto mb-6" ref={cartRef}>
               {selectedProducts.length === 0 ? (
@@ -469,6 +507,7 @@ function SaleManager() {
                     className="border border-gray-300 p-2 rounded-md w-full text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     disabled={loading}
                     onFocus={(e) => e.target.select()}
+                    aria-label="Số tiền nợ"
                   />
                   <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500">đ</span>
                 </div>
@@ -479,6 +518,7 @@ function SaleManager() {
                   placeholder="Ngày nợ"
                   className="border border-gray-300 p-2 rounded-md w-full text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   disabled={loading}
+                  aria-label="Ngày nợ"
                 />
               </div>
               <div className="flex justify-between items-center mb-2">
@@ -517,6 +557,7 @@ function SaleManager() {
                   placeholder="Nhập mã hóa đơn"
                   className="border border-gray-300 p-2 rounded-md w-full text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   disabled={loading}
+                  aria-label="Mã hóa đơn"
                 />
                 <button
                   onClick={fetchInvoiceByCode}
@@ -557,7 +598,7 @@ function SaleManager() {
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
             <h3 className="text-xl font-semibold text-gray-900 mb-4">Cập nhật giá sản phẩm</h3>
             <p className="text-gray-600 mb-4">
-              Sản phẩm: {products.find((p) => p.id === selectedProductId)?.name}
+              Sản phẩm: {products.find((p) => p.id === selectedProductId)?.name || 'Không xác định'}
             </p>
             <div className="relative mb-4">
               <input
@@ -576,6 +617,7 @@ function SaleManager() {
                 className="border border-gray-300 p-2 rounded-md w-full text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 disabled={loading}
                 onFocus={(e) => e.target.select()}
+                aria-label="Giá mới"
               />
               <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500">đ</span>
             </div>
@@ -674,7 +716,7 @@ function SaleManager() {
                 {debtAmount !== '' && (
                   <div>
                     <span className="font-normal">Tiền nợ:</span>{' '}
-                    {debtAmount + "đ"} - <span className="italic">{debtDate}</span>
+                    {formatCurrency(getRawPrice(debtAmount))} - <span className="italic">{debtDate}</span>
                   </div>
                 )}
               </div>
