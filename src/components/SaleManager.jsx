@@ -23,6 +23,7 @@ function SaleManager() {
   const [debtDate, setDebtDate] = useState('');
 
   const componentRef = useRef();
+  const cartRef = useRef(); // Add ref for cart container
 
   useEffect(() => {
     fetchData();
@@ -130,22 +131,34 @@ function SaleManager() {
       ? getRawPrice(inputPrice)
       : productToAdd.price;
 
-    const existingProduct = selectedProducts.find((p) => p.id === productToAdd.id);
+    const existingProductIndex = selectedProducts.findIndex((p) => p.id === productToAdd.id);
+    let updatedProducts;
 
-    if (existingProduct) {
-      setSelectedProducts(
-        selectedProducts.map((p) =>
-          p.id === productToAdd.id
-            ? { ...p, quantity: p.quantity + quantity, price }
-            : p
-        )
+    if (existingProductIndex >= 0) {
+      updatedProducts = selectedProducts.map((p, index) =>
+        index === existingProductIndex
+          ? { ...p, quantity: p.quantity + quantity, price }
+          : p
       );
     } else {
-      setSelectedProducts([...selectedProducts, { ...productToAdd, quantity, price }]);
+      updatedProducts = [...selectedProducts, { ...productToAdd, quantity, price }];
     }
 
+    setSelectedProducts(updatedProducts);
     setQuantities({ ...quantities, [productToAdd.id]: '' });
     setCustomPrices({ ...customPrices, [productToAdd.id]: '' });
+
+    // Scroll to the newly added or updated product
+    setTimeout(() => {
+      if (cartRef.current) {
+        const productElements = cartRef.current.querySelectorAll('.cart-item');
+        const targetIndex = existingProductIndex >= 0 ? existingProductIndex : updatedProducts.length - 1;
+        const targetElement = productElements[targetIndex];
+        if (targetElement) {
+          targetElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    }, 0);
   };
 
   const removeProduct = (id) => {
@@ -328,7 +341,7 @@ function SaleManager() {
                                 className="text-gray-500 hover:text-gray-700"
                                 disabled={loading}
                               >
-                                <svg className="w-5 h-5 font-bold " fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <svg className="w-5 h-5 font-bold" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v.01M12 12v.01M12 18v.01"></path>
                                 </svg>
                               </button>
@@ -384,7 +397,7 @@ function SaleManager() {
               className="border border-gray-300 p-3 rounded-md mb-6 w-full text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               disabled={loading}
             />
-            <div className="max-h-96 overflow-y-auto mb-6">
+            <div className="max-h-96 overflow-y-auto mb-6" ref={cartRef}>
               {selectedProducts.length === 0 ? (
                 <div className="text-center py-8 text-gray-500 text-base leading-relaxed">
                   <p>Giỏ hàng trống</p>
@@ -392,7 +405,7 @@ function SaleManager() {
               ) : (
                 <div className="space-y-3">
                   {selectedProducts.map((product, index) => (
-                    <div key={product.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-md">
+                    <div key={product.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-md cart-item">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           <span className="text-base text-gray-900 font-medium">{index + 1}. {product.name}</span>
@@ -670,8 +683,6 @@ function SaleManager() {
           </div>
         </div>
       )}
-
-
     </div>
   );
 }
