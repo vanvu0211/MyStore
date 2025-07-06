@@ -367,9 +367,9 @@ function SaleManager() {
               <p className="text-gray-600 text-base leading-relaxed">Vui lòng chọn một danh mục</p>
             ) : (
               <div ref={categoryRef} className="mb-6">
-                <h4 className="text-2xl font-bold text-blue-700 bg-blue-200 mb-4 border-b pb-2 leading-relaxed">
+                {/* <h4 className="text-2xl font-bold text-blue-700 bg-blue-200 mb-4 border-b pb-2 leading-relaxed">
                   {categories.find(c => c.id === selectedCategoryId)?.name || 'Danh mục'}
-                </h4>
+                </h4> */}
                 {products.length === 0 ? (
                   <p className="text-gray-600 text-base leading-relaxed">Không có sản phẩm nào trong danh mục này</p>
                 ) : (
