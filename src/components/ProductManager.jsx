@@ -83,7 +83,7 @@ function ProductManager() {
           maxSizeMB: 0.01,
           maxWidthOrHeight: 800,
           useWebWorker: true,
-          initialQuality: 0.8,
+          initialQuality: 0.9,
         };
         const compressedFile = await imageCompression(file, options);
         setImageFile(compressedFile);
