@@ -1,13 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { useReactToPrint } from 'react-to-print';
-import * as XLSX from 'xlsx';
 import { API_URL } from '../config';
 import qrBankImage from '../assets/qr_bank.png';
 
 // Fallback formatCurrency implementation (remove if already defined in ../utils/utils)
 const formatCurrency = (value) => {
   if (!value || isNaN(value)) return '0 đ';
-  return `${parseInt(value).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')} đ`;
+  return `${parseInt(value).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`;
 };
 
 function SaleManager() {
@@ -96,11 +95,11 @@ function SaleManager() {
       const response = await fetch(`${API_URL}/Invoices/count`);
       if (!response.ok) throw new Error('Không thể lấy số lượng hóa đơn');
       const count = await response.json();
-      return `HĐ${count + 1}`;
+      return `HD${count + 1}`;
     } catch (error) {
       console.error('Error fetching invoice count:', error);
       setError('Không thể tạo mã hóa đơn');
-      return `HĐ${Date.now()}`; // Fallback in case of error
+      return `HD${Date.now()}`; // Fallback in case of error
     }
   };
 
@@ -230,11 +229,10 @@ function SaleManager() {
     try {
       const invoiceCode = await generateInvoiceCode();
       const rawDebtAmount = debtAmount ? getRawPrice(debtAmount) : 0;
-      const saleDate = new Date();
       const invoicePayload = {
         customerName,
         invoiceCode,
-        saleDate: saleDate.toISOString(),
+        saleDate: new Date().toISOString(),
         debtAmount: rawDebtAmount,
         debtDate: debtDate || null,
         items: selectedProducts.map((p) => ({
@@ -244,7 +242,6 @@ function SaleManager() {
         })),
       };
 
-      // Save invoice to the server
       const response = await fetch(`${API_URL}/Invoices`, {
         method: 'POST',
         headers: {
@@ -273,52 +270,6 @@ function SaleManager() {
         })),
         total: savedInvoice.totalAmount,
       };
-
-      // Generate Excel file
-      const wb = XLSX.utils.book_new();
-      const wsData = [
-        ['Tạp hóa Văn Bằng'],
-        ['0966900544 - Thôn 5, Quảng Tín, Đắk R Lấp'],
-        [],
-        ['HÓA ĐƠN TẠM TÍNH'],
-        [`Mã hóa đơn: ${invoiceToPrint.invoiceCode}`],
-        [`Ngày: ${new Date(invoiceToPrint.saleDate).toLocaleDateString('vi-VN', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-        })}`],
-        [`Khách: ${invoiceToPrint.customerName}`],
-        [],
-        ['Sản phẩm', 'Đơn giá', 'Số lượng', 'Thành tiền'],
-        ...invoiceToPrint.items.map(item => [
-          item.name,
-          formatCurrency(item.price),
-          item.quantity,
-          formatCurrency(item.price * item.quantity),
-        ]),
-        [],
-        ['Tổng', '', invoiceToPrint.items.reduce((sum, p) => sum + p.quantity, 0), formatCurrency(invoiceToPrint.items.reduce((sum, p) => sum + p.price * p.quantity, 0))],
-        ...(debtAmount !== '' ? [['Tiền nợ', '', '', `${formatCurrency(getRawPrice(debtAmount))} - ${debtDate}`]] : []),
-        ['Tiền thanh toán', '', '', formatCurrency(calculateTotalWithDebt())],
-        [],
-        ['LB Bank'],
-        ['THAI THI LIEU'],
-        ['3377226666'],
-      ];
-
-      const ws = XLSX.utils.aoa_to_sheet(wsData);
-      XLSX.utils.book_append_sheet(wb, ws, 'Invoice');
-
-      // Create directory-like file name
-      const year = saleDate.getFullYear();
-      const month = String(saleDate.getMonth() + 1).padStart(2, '0');
-      const day = String(saleDate.getDate()).padStart(2, '0');
-      const fileName = `Hoadon/${year}/${month}/${day}/${invoiceToPrint.invoiceCode}.xlsx`;
-
-      // Trigger download
-      XLSX.writeFile(wb, fileName);
 
       setInvoiceData(invoiceToPrint);
       setError(null);
@@ -709,18 +660,18 @@ function SaleManager() {
           <div
             ref={componentRef}
             className="w-80 p-2 text-sm font-sans bg-white text-black"
-            style={{ width: '80mm', padding: '2mm' }}
+            style={{ width: '80mm', padding: '2mm', fontSize: '13pt' }}
           >
             <div className="text-center mb-2.5">
-              <div className="font-bold text-base">Tạp hóa Văn Bằng</div>
-              <div className="text-11 leading-tight">
+              <div className="font-bold text-lg">Tạp hóa Văn Bằng</div>
+              <div className="text-13 leading-tight">
                 0966900544 - Thôn 5, Quảng Tín, Đắk R Lấp
               </div>
             </div>
             <div className="text-center my-2.5">
-              <div className="font-bold text-14">HÓA ĐƠN TẠM TÍNH</div>
-              <div className="text-11">Mã hóa đơn: {invoiceData.invoiceCode}</div>
-              <div className="text-11">
+              <div className="font-bold text-16">HÓA ĐƠN TẠM TÍNH</div>
+              <div className="text-13">Mã hóa đơn: {invoiceData.invoiceCode}</div>
+              <div className="text-13">
                 {new Date(invoiceData.saleDate).toLocaleDateString('vi-VN', {
                   day: '2-digit',
                   month: '2-digit',
@@ -730,10 +681,10 @@ function SaleManager() {
                 })}
               </div>
             </div>
-            <div className="mb-2 text-base">
+            <div className="mb-2 text-lg">
               <strong>Khách:</strong> {invoiceData.customerName}
             </div>
-            <table className="w-full border-collapse text-11 mb-2">
+            <table className="w-full border-collapse text-lg mb-2">
               <thead>
                 <tr className="border-b border-black">
                   <th className="text-left py-0.5 w-4/10">Sản phẩm</th>
@@ -759,13 +710,13 @@ function SaleManager() {
                 ))}
               </tbody>
             </table>
-            <div className="border-t border-black pt-1.5 mb-2.5 text-left text-12">
+            <div className="border-t border-black pt-1.5 mb-2.5 text-left text-14">
               <div>
                 Tổng: <span className="font-semibold">
                   {invoiceData.items.reduce((sum, p) => sum + p.quantity, 0)} sản phẩm
                 </span>
               </div>
-              <div className="text-sm font-semibold mt-0.5">
+              <div className="text-lg font-semibold mt-0.5">
                 <div>
                   <span className="font-normal">Tổng hóa đơn:</span>{' '}
                   {formatCurrency(invoiceData.items.reduce((sum, p) => sum + p.price * p.quantity, 0))}
@@ -777,11 +728,11 @@ function SaleManager() {
                   </div>
                 )}
               </div>
-              <div className="text-base font-semibold mt-0.5">
+              <div className="text-lg font-semibold mt-0.5">
                 <div>Tiền thanh toán: {formatCurrency(calculateTotalWithDebt())}</div>
               </div>
             </div>
-            <div className="my-2.5 text-11">
+            <div className="my-2.5 text-13">
               <div className="border-t border-black mb-2"></div>
               <div className="flex items-center justify-between">
                 <img
@@ -791,7 +742,7 @@ function SaleManager() {
                   style={{ width: '25mm', height: '25mm' }}
                 />
                 <div
-                  className="text-sm leading-tight text-right font-semibold mr-5mm"
+                  className="text-base leading-tight text-right font-semibold mr-5mm"
                   style={{ marginRight: '5mm' }}
                 >
                   <div>LB Bank</div>
