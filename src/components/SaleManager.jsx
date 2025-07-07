@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useReactToPrint } from 'react-to-print';
+import * as XLSX from 'xlsx';
 import { API_URL } from '../config';
 import qrBankImage from '../assets/qr_bank.png';
 
@@ -90,10 +91,17 @@ function SaleManager() {
     }
   };
 
-  const generateInvoiceCode = () => {
-    const timestamp = Date.now().toString(36);
-    const randomStr = Math.random().toString(36).substring(2, 8);
-    return `INV-${timestamp}-${randomStr}`.toUpperCase();
+  const generateInvoiceCode = async () => {
+    try {
+      const response = await fetch(`${API_URL}/Invoices/count`);
+      if (!response.ok) throw new Error('Không thể lấy số lượng hóa đơn');
+      const count = await response.json();
+      return `HĐ${count + 1}`;
+    } catch (error) {
+      console.error('Error fetching invoice count:', error);
+      setError('Không thể tạo mã hóa đơn');
+      return `HĐ${Date.now()}`; // Fallback in case of error
+    }
   };
 
   const handlePrint = useReactToPrint({
@@ -220,12 +228,13 @@ function SaleManager() {
 
     setLoading(true);
     try {
-      const invoiceCode = generateInvoiceCode();
+      const invoiceCode = await generateInvoiceCode();
       const rawDebtAmount = debtAmount ? getRawPrice(debtAmount) : 0;
+      const saleDate = new Date();
       const invoicePayload = {
         customerName,
         invoiceCode,
-        saleDate: new Date().toISOString(),
+        saleDate: saleDate.toISOString(),
         debtAmount: rawDebtAmount,
         debtDate: debtDate || null,
         items: selectedProducts.map((p) => ({
@@ -235,6 +244,7 @@ function SaleManager() {
         })),
       };
 
+      // Save invoice to the server
       const response = await fetch(`${API_URL}/Invoices`, {
         method: 'POST',
         headers: {
@@ -263,6 +273,52 @@ function SaleManager() {
         })),
         total: savedInvoice.totalAmount,
       };
+
+      // Generate Excel file
+      const wb = XLSX.utils.book_new();
+      const wsData = [
+        ['Tạp hóa Văn Bằng'],
+        ['0966900544 - Thôn 5, Quảng Tín, Đắk R Lấp'],
+        [],
+        ['HÓA ĐƠN TẠM TÍNH'],
+        [`Mã hóa đơn: ${invoiceToPrint.invoiceCode}`],
+        [`Ngày: ${new Date(invoiceToPrint.saleDate).toLocaleDateString('vi-VN', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        })}`],
+        [`Khách: ${invoiceToPrint.customerName}`],
+        [],
+        ['Sản phẩm', 'Đơn giá', 'Số lượng', 'Thành tiền'],
+        ...invoiceToPrint.items.map(item => [
+          item.name,
+          formatCurrency(item.price),
+          item.quantity,
+          formatCurrency(item.price * item.quantity),
+        ]),
+        [],
+        ['Tổng', '', invoiceToPrint.items.reduce((sum, p) => sum + p.quantity, 0), formatCurrency(invoiceToPrint.items.reduce((sum, p) => sum + p.price * p.quantity, 0))],
+        ...(debtAmount !== '' ? [['Tiền nợ', '', '', `${formatCurrency(getRawPrice(debtAmount))} - ${debtDate}`]] : []),
+        ['Tiền thanh toán', '', '', formatCurrency(calculateTotalWithDebt())],
+        [],
+        ['LB Bank'],
+        ['THAI THI LIEU'],
+        ['3377226666'],
+      ];
+
+      const ws = XLSX.utils.aoa_to_sheet(wsData);
+      XLSX.utils.book_append_sheet(wb, ws, 'Invoice');
+
+      // Create directory-like file name
+      const year = saleDate.getFullYear();
+      const month = String(saleDate.getMonth() + 1).padStart(2, '0');
+      const day = String(saleDate.getDate()).padStart(2, '0');
+      const fileName = `Hoadon/${year}/${month}/${day}/${invoiceToPrint.invoiceCode}.xlsx`;
+
+      // Trigger download
+      XLSX.writeFile(wb, fileName);
 
       setInvoiceData(invoiceToPrint);
       setError(null);
@@ -402,7 +458,7 @@ function SaleManager() {
                                 className="text-gray-500 hover:text-gray-700"
                                 disabled={loading}
                               >
-                                <svg className="w-5 h-5 font-bold" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v.01M12 12v.01M12 18v.01"></path>
                                 </svg>
                               </button>
