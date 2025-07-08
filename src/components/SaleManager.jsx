@@ -360,9 +360,8 @@ function SaleManager() {
                     <button
                       key={category.id}
                       onClick={() => scrollToCategory(category.id)}
-                      className={`py-2 px-4 rounded-md text-base font-medium transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed ${
-                        selectedCategoryId === category.id ? 'bg-blue-900 text-white' : 'bg-blue-400 text-white hover:bg-blue-600'
-                      }`}
+                      className={`py-2 px-4 rounded-md text-base font-medium transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed ${selectedCategoryId === category.id ? 'bg-blue-900 text-white' : 'bg-blue-400 text-white hover:bg-blue-600'
+                        }`}
                       disabled={loading}
                     >
                       {category.name}
@@ -711,25 +710,28 @@ function SaleManager() {
               </tbody>
             </table>
             <div className="border-t border-black pt-1.5 mb-2.5 text-left text-14">
-              <div>
+              <div className="border-b border-gray-300 pb-1 mb-1">
                 Tổng: <span className="font-semibold">
                   {invoiceData.items.reduce((sum, p) => sum + p.quantity, 0)} sản phẩm
                 </span>
               </div>
               <div className="text-lg font-semibold mt-0.5">
-                <div>
+                <div className="border-b border-gray-300 pb-1 mb-1">
                   <span className="font-normal">Tổng hóa đơn:</span>{' '}
                   {formatCurrency(invoiceData.items.reduce((sum, p) => sum + p.price * p.quantity, 0))}
                 </div>
                 {debtAmount !== '' && (
-                  <div>
+                  <div className="border-b border-gray-300 pb-1 mb-1">
                     <span className="font-normal">Tiền nợ:</span>{' '}
                     {formatCurrency(getRawPrice(debtAmount))} - <span className="italic">{debtDate}</span>
                   </div>
                 )}
               </div>
-              <div className="text-lg font-semibold mt-0.5">
-                <div>Tiền thanh toán: {formatCurrency(calculateTotalWithDebt())}</div>
+              <div className="text-lg  font-semibold mt-0.5">
+                <div className="">
+                  <span className="font-normal">Tiền thanh toán:</span>{' '}
+                  {formatCurrency(calculateTotalWithDebt())}
+                </div>
               </div>
             </div>
             <div className="my-2.5 text-13">
