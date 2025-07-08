@@ -703,7 +703,7 @@ function SaleManager() {
                     <td className="text-center py-0.5 border-b border-r border-dashed border-gray-400">
                       {item.quantity}
                     </td>
-                    <td className="text-center ml-0.5 py-0.5 border-b border-r border-dashed border-gray-400">
+                    <td className="text-center ml-0.5 py-0.5 border-b border-dashed border-gray-400">
                       {formatCurrency(item.price * item.quantity)}
                     </td>
                   </tr>
