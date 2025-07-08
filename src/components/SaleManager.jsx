@@ -680,9 +680,9 @@ function SaleManager() {
                 })}
               </div>
             </div>
-            <div className="mb-2 text-lg">
-              <strong>Khách:</strong> {invoiceData.customerName}
-            </div>
+            <div className="mb-2 text-xl">
+  <strong>Khách:</strong> {invoiceData.customerName.toUpperCase()}
+</div>
             <table className="w-full border-collapse text-lg mb-2">
               <thead>
                 <tr className="border-b border-black">
@@ -709,7 +709,7 @@ function SaleManager() {
                 ))}
               </tbody>
             </table>
-            <div className="border-t border-black pt-1.5 mb-2.5 text-left text-14">
+            <div className="border-t border-black pt-1.5 mb-2.5 text-right text-14">
               <div className="border-b border-gray-300 pb-1 mb-1">
                 Tổng: <span className="font-semibold">
                   {invoiceData.items.reduce((sum, p) => sum + p.quantity, 0)} sản phẩm
@@ -722,8 +722,8 @@ function SaleManager() {
                 </div>
                 {debtAmount !== '' && (
                   <div className="border-b border-gray-300 pb-1 mb-1">
-                    <span className="font-normal">Tiền nợ:</span>{' '}
-                    {formatCurrency(getRawPrice(debtAmount))} - <span className="italic">{debtDate}</span>
+                    <span className="font-normal">Tiền nợ ({debtDate}) :</span>{' '}
+                    {formatCurrency(getRawPrice(debtAmount))}
                   </div>
                 )}
               </div>
