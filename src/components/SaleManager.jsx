@@ -710,18 +710,18 @@ function SaleManager() {
               </tbody>
             </table>
             <div className="border-t border-black pt-1.5 mb-2.5 text-right text-14">
-              <div className="border-b border-gray-500 pb-1 mb-1">
+              <div className="border-b border-gray-300 pb-1 mb-1">
                 Tổng: <span className="font-semibold">
                   {invoiceData.items.reduce((sum, p) => sum + p.quantity, 0)} sản phẩm
                 </span>
               </div>
               <div className="text-lg font-semibold mt-0.5">
-                <div className="border-b border-gray-500 pb-1 mb-1">
+                <div className="border-b border-gray-300 pb-1 mb-1">
                   <span className="font-normal">Tổng hóa đơn:</span>{' '}
                   {formatCurrency(invoiceData.items.reduce((sum, p) => sum + p.price * p.quantity, 0))}
                 </div>
                 {debtAmount !== '' && (
-                  <div className="border-b border-gray-500 pb-1 mb-1">
+                  <div className="border-b border-gray-300 pb-1 mb-1">
                     <span className="font-normal">Tiền nợ ({debtDate}) :</span>{' '}
                     {formatCurrency(getRawPrice(debtAmount))}
                   </div>
