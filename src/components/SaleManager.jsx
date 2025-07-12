@@ -686,22 +686,23 @@ function SaleManager() {
             <table className="w-full border-collapse text-lg mb-2">
               <thead>
                 <tr className="border-b border-black">
-                  <th className="text-left py-0.5 w-4/10 ">Sản phẩm</th>
+                  <th className="text-left py-0.5 w-1/10 ">SL</th>
+                  <th className="text-center py-0.5 w-4/10 ">Sản phẩm</th>
                   <th className="text-center py-0.5 w-1/4 ">Đơn giá</th>
-                  <th className="text-center py-0.5 w-1/10 ">SL</th>
                   <th className="text-center py-0.5 w-1/4">T.tiền</th>
                 </tr>
               </thead>
               <tbody>
                 {invoiceData.items.map((item, index) => (
                   <tr key={index}>
-                    <td className="py-0.5 border-b  border-r border-dashed border-gray-400">{item.name}</td>
+                     <td className=" py-0.5 border-b border-r border-dashed border-gray-400">
+                      {item.quantity}
+                    </td>
+                    <td className="text-center py-0.5 border-b  border-r border-dashed border-gray-400">{item.name}</td>
                     <td className="text-center py-0.5 border-b border-r border-dashed border-gray-400">
                       {formatCurrency(item.price)}
                     </td>
-                    <td className="text-center py-0.5 border-b border-r border-dashed border-gray-400">
-                      {item.quantity}
-                    </td>
+                   
                     <td className="text-center ml-0.5 py-0.5 border-b border-dashed border-gray-400">
                       {formatCurrency(item.price * item.quantity)}
                     </td>
