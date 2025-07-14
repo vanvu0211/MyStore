@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, NavLink } from 'react-router-dom';
 import CategoryManager from './components/CategoryManager';
 import ProductManager from './components/ProductManager';
 import SaleManager from './components/SaleManager';
@@ -16,18 +16,46 @@ function App() {
           <div className="w-full flex justify-between items-center px-4">
             <h1 className="text-2xl font-bold">Tạp Hóa Văn Bằng</h1>
             <div className="hidden md:flex space-x-4">
-              <Link to="/" className="hover:bg-blue-700 px-3 py-2 rounded transition-colors">
+              <NavLink
+                to="/"
+                className={({ isActive }) =>
+                  `px-3 py-2 rounded transition-colors ${
+                    isActive ? 'bg-blue-800 text-white' : 'hover:bg-blue-700'
+                  }`
+                }
+              >
                 Bán hàng
-              </Link>
-              <Link to="/products" className="hover:bg-blue-700 px-3 py-2 rounded transition-colors">
+              </NavLink>
+              <NavLink
+                to="/products"
+                className={({ isActive }) =>
+                  `px-3 py-2 rounded transition-colors ${
+                    isActive ? 'bg-blue-800 text-white' : 'hover:bg-blue-700'
+                  }`
+                }
+              >
                 Quản lý hàng hóa
-              </Link>
-              <Link to="/category" className="hover:bg-blue-700 px-3 py-2 rounded transition-colors">
+              </NavLink>
+              <NavLink
+                to="/category"
+                className={({ isActive }) =>
+                  `px-3 py-2 rounded transition-colors ${
+                    isActive ? 'bg-blue-800 text-white' : 'hover:bg-blue-700'
+                  }`
+                }
+              >
                 Quản lý loại hàng hóa
-              </Link>
-              <Link to="/invoice" className="hover:bg-blue-700 px-3 py-2 rounded transition-colors">
+              </NavLink>
+              <NavLink
+                to="/invoice"
+                className={({ isActive }) =>
+                  `px-3 py-2 rounded transition-colors ${
+                    isActive ? 'bg-blue-800 text-white' : 'hover:bg-blue-700'
+                  }`
+                }
+              >
                 Quản lý hóa đơn
-              </Link>
+              </NavLink>
             </div>
             <button
               className="md:hidden focus:outline-none"
@@ -45,34 +73,50 @@ function App() {
           </div>
           {isMenuOpen && (
             <div className="md:hidden mt-2 px-4">
-              <Link
+              <NavLink
                 to="/"
-                className="block hover:bg-blue-700 px-3 py-2 rounded transition-colors"
+                className={({ isActive }) =>
+                  `block px-3 py-2 rounded transition-colors ${
+                    isActive ? 'bg-blue-800 text-white' : 'hover:bg-blue-700'
+                  }`
+                }
                 onClick={() => setIsMenuOpen(false)}
               >
                 Bán hàng
-              </Link>
-              <Link
+              </NavLink>
+              <NavLink
                 to="/products"
-                className="block hover:bg-blue-700 px-3 py-2 rounded transition-colors"
+                className={({ isActive }) =>
+                  `block px-3 py-2 rounded transition-colors ${
+                    isActive ? 'bg-blue-800 text-white' : 'hover:bg-blue-700'
+                  }`
+                }
                 onClick={() => setIsMenuOpen(false)}
               >
                 Quản lý hàng hóa
-              </Link>
-              <Link
+              </NavLink>
+              <NavLink
                 to="/category"
-                className="block hover:bg-blue-700 px-3 py-2 rounded transition-colors"
+                className={({ isActive }) =>
+                  `block px-3 py-2 rounded transition-colors ${
+                    isActive ? 'bg-blue-800 text-white' : 'hover:bg-blue-700'
+                  }`
+                }
                 onClick={() => setIsMenuOpen(false)}
               >
                 Quản lý loại hàng hóa
-              </Link>
-              <Link
+              </NavLink>
+              <NavLink
                 to="/invoice"
-                className="block hover:bg-blue-700 px-3 py-2 rounded transition-colors"
+                className={({ isActive }) =>
+                  `block px-3 py-2 rounded transition-colors ${
+                    isActive ? 'bg-blue-800 text-white' : 'hover:bg-blue-700'
+                  }`
+                }
                 onClick={() => setIsMenuOpen(false)}
               >
                 Quản lý hóa đơn
-              </Link>
+              </NavLink>
             </div>
           )}
         </nav>
