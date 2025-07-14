@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import CategoryManager from './components/CategoryManager';
 import ProductManager from './components/ProductManager';
 import SaleManager from './components/SaleManager';
+import InvoiceSearch from './components/InvoiceSearch';
 
 function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -23,6 +24,9 @@ function App() {
               </Link>
               <Link to="/category" className="hover:bg-blue-700 px-3 py-2 rounded transition-colors">
                 Quản lý loại hàng hóa
+              </Link>
+              <Link to="/invoice" className="hover:bg-blue-700 px-3 py-2 rounded transition-colors">
+                Quản lý hóa đơn
               </Link>
             </div>
             <button
@@ -62,6 +66,13 @@ function App() {
               >
                 Quản lý loại hàng hóa
               </Link>
+              <Link
+                to="/invoice"
+                className="block hover:bg-blue-700 px-3 py-2 rounded transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Quản lý hóa đơn
+              </Link>
             </div>
           )}
         </nav>
@@ -71,6 +82,7 @@ function App() {
           <Routes>
             <Route path="/category" element={<CategoryManager />} />
             <Route path="/products" element={<ProductManager />} />
+            <Route path="/invoice" element={<InvoiceSearch />} />
             <Route path="/" element={<SaleManager />} />
           </Routes>
         </div>

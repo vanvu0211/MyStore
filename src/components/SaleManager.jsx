@@ -198,26 +198,6 @@ function SaleManager() {
     setSelectedProducts(selectedProducts.filter((p) => p.id !== id));
   };
 
-  const fetchInvoiceByCode = async () => {
-    if (!searchInvoiceCode) {
-      setError('Vui lòng nhập mã hóa đơn để tìm kiếm');
-      return;
-    }
-    setLoading(true);
-    try {
-      const response = await fetch(`${API_URL}/Invoices/by-code/${searchInvoiceCode}`);
-      if (!response.ok) throw new Error('Không tìm thấy hóa đơn');
-      const data = await response.json();
-      setSearchedInvoice(data);
-      setError(null);
-    } catch (error) {
-      console.error('Error fetching invoice:', error);
-      setError('Không tìm thấy hóa đơn hoặc có lỗi xảy ra');
-      setSearchedInvoice(null);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const prepareAndPrint = async () => {
     if (!customerName || selectedProducts.length === 0) {
@@ -378,7 +358,7 @@ function SaleManager() {
                   ) : (
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-3">
                       {products.map((product) => (
-                        <div key={product.id} className="border rounded-lg shadow-sm bg-white hover:shadow-md transition-all duration-200 hover:scale-105 p-3">
+                        <div key={product.id} className="border rounded-lg shadow-sm bg-white hover:bg-blue-100 hover:shadow-md transition-all duration-200 hover:scale-105 p-3">
                           <div className="relative">
                             <img
                               src={product.image}
@@ -389,8 +369,8 @@ function SaleManager() {
                               }}
                             />
                           </div>
-                          <div className="space-y-2">
-                            <h4 className="font-semibold text-gray-900 text-base line-clamp-2 min-h-[2.5rem]">
+                          <div className="space-y-1">
+                            <h4 className="font-semibold text-gray-900 text-base line-clamp-2 min-h-[1rem]">
                               {product.name}
                             </h4>
                             <div className="flex items-center gap-2">
@@ -553,46 +533,7 @@ function SaleManager() {
               {loading ? 'Đang xử lý...' : 'Xuất hóa đơn'}
             </button>
           </div>
-          <div className="mt-6 border-t pt-4">
-            <h4 className="text-lg font-semibold mb-4">Tìm kiếm hóa đơn</h4>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={searchInvoiceCode}
-                onChange={(e) => setSearchInvoiceCode(e.target.value)}
-                placeholder="Nhập mã hóa đơn"
-                className="border border-gray-300 p-2 rounded-md w-full text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                disabled={loading}
-                aria-label="Mã hóa đơn"
-              />
-              <button
-                onClick={fetchInvoiceByCode}
-                className="bg-blue-500 text-white py-2 px-4 rounded-md text-base font-medium hover:bg-blue-600 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                disabled={loading}
-              >
-                Tìm
-              </button>
-            </div>
-            {searchedInvoice && (
-              <div className="mt-4 p-3 bg-gray-50 rounded-md">
-                <h5 className="font-semibold">Thông tin hóa đơn</h5>
-                <p><strong>Mã hóa đơn:</strong> {searchedInvoice.invoiceCode}</p>
-                <p><strong>Khách hàng:</strong> {searchedInvoice.customerName}</p>
-                <p><strong>Ngày bán:</strong> {new Date(searchedInvoice.saleDate).toLocaleDateString('vi-VN')}</p>
-                <p><strong>Sản phẩm:</strong></p>
-                <ul className="list-disc pl-5">
-                  {searchedInvoice.items.map((item, index) => (
-                    <li key={index}>
-                      {item.productName} - {formatCurrency(item.salePrice)} x {item.quantity}
-                    </li>
-                  ))}
-                </ul>
-                <p><strong>Số tiền nợ:</strong> {formatCurrency(searchedInvoice.debtAmount || 0)}</p>
-                <p><strong>Tổng hóa đơn:</strong> {formatCurrency(searchedInvoice.totalInvoice)}</p>
-                <p><strong>Tổng cộng:</strong> {formatCurrency(searchedInvoice.totalAmount)}</p>
-              </div>
-            )}
-          </div>
+        
         </div>
       </div>
 
