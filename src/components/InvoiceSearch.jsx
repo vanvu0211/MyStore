@@ -93,7 +93,6 @@ function InvoiceSearch() {
                       <tbody>
                         {searchedInvoice.items.map((item, index) => (
                           <tr key={index} className="border-b hover:bg-gray-50">
-                            <td className="p-3 text-base sm:text-sm">{index + 1}</td>
                             <td className="p-3 text-base sm:text-sm">{item.productName}</td>
                             <td className="p-3 text-base sm:text-sm">{item.quantity}</td>
                             <td className="p-3 text-base sm:text-sm">{formatCurrency(item.salePrice)}</td>
