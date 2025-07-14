@@ -579,10 +579,6 @@ function SaleManager() {
                 <p><strong>Mã hóa đơn:</strong> {searchedInvoice.invoiceCode}</p>
                 <p><strong>Khách hàng:</strong> {searchedInvoice.customerName}</p>
                 <p><strong>Ngày bán:</strong> {new Date(searchedInvoice.saleDate).toLocaleDateString('vi-VN')}</p>
-                <p><strong>Số tiền nợ:</strong> {formatCurrency(searchedInvoice.debtAmount || 0)}</p>
-                {searchedInvoice.debtDate && (
-                  <p><strong>Ngày nợ:</strong> {new Date(searchedInvoice.debtDate).toLocaleDateString('vi-VN')}</p>
-                )}
                 <p><strong>Sản phẩm:</strong></p>
                 <ul className="list-disc pl-5">
                   {searchedInvoice.items.map((item, index) => (
@@ -591,6 +587,8 @@ function SaleManager() {
                     </li>
                   ))}
                 </ul>
+                <p><strong>Số tiền nợ:</strong> {formatCurrency(searchedInvoice.debtAmount || 0)}</p>
+                <p><strong>Tổng hóa đơn:</strong> {formatCurrency(searchedInvoice.totalInvoice)}</p>
                 <p><strong>Tổng cộng:</strong> {formatCurrency(searchedInvoice.totalAmount)}</p>
               </div>
             )}
