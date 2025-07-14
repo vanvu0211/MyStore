@@ -744,7 +744,7 @@ function SaleManager() {
                   className="text-base leading-tight text-right font-semibold mr-5mm"
                   style={{ marginRight: '5mm' }}
                 >
-                  <div>LB Bank</div>
+                  <div>LP Bank</div>
                   <div>THAI THI LIEU</div>
                   <div>3377226666</div>
                 </div>
