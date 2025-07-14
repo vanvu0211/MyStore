@@ -654,7 +654,7 @@ function SaleManager() {
         <div className="hidden print:block">
           <div
             ref={componentRef}
-            className="w-80 p-2 text-sm font-sans bg-white text-black"
+            className="w-80  text-sm font-sans bg-white text-black"
             style={{ width: '80mm', padding: '2mm', fontSize: '13pt' }}
           >
             <div className="text-center mb-2.5">
