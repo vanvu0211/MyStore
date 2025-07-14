@@ -84,9 +84,8 @@ function InvoiceSearch() {
                     <table className="w-full text-left border-collapse">
                       <thead>
                         <tr className="bg-blue-200">
-                          <th className="p-3 text-base font-semibold text-gray-700 border-b sm:text-sm">STT</th>
                           <th className="p-3 text-base font-semibold text-gray-700 border-b sm:text-sm">Tên</th>
-                          <th className="p-3 text-base font-semibold text-gray-700 border-b sm:text-sm">Số lượng</th>
+                          <th className="p-3 text-base font-semibold text-gray-700 border-b sm:text-sm">SL</th>
                           <th className="p-3 text-base font-semibold text-gray-700 border-b sm:text-sm">Giá bán</th>
                           <th className="p-3 text-base font-semibold text-gray-700 border-b sm:text-sm">Thành tiền</th>
                         </tr>
