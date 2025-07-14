@@ -233,8 +233,7 @@ function SaleManager() {
         customerName,
         invoiceCode,
         saleDate: new Date().toISOString(),
-        debtAmount: rawDebtAmount,
-        debtDate: debtDate || null,
+        debtAmount: rawDebtAmount| null,
         items: selectedProducts.map((p) => ({
           productName: p.name,
           salePrice: p.price,
@@ -261,7 +260,6 @@ function SaleManager() {
         invoiceCode: savedInvoice.invoiceCode,
         saleDate: savedInvoice.saleDate,
         debtAmount: savedInvoice.debtAmount,
-        debtDate: savedInvoice.debtDate,
         items: savedInvoice.items.map((item) => ({
           id: item.id,
           name: item.productName,
