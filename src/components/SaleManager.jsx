@@ -660,7 +660,7 @@ function SaleManager() {
                 </div>
                 {debtAmount !== '' && (
                   <div className="border-b border-gray-300 pb-1 mb-1">
-                    <span className="font-normal">Tiền nợ ({debtDate}) :</span>{' '}
+                    <span className="font-normal">Tiền nợ :</span>{' '}
                     {formatCurrency(getRawPrice(debtAmount))}
                   </div>
                 )}
