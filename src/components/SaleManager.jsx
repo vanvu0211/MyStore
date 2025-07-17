@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import { API_URL } from '../config';
 import qrBankImage from '../assets/qr_bank.png';
-
+import { IoIosPricetag } from "react-icons/io";
 // Fallback formatCurrency implementation (remove if already defined in ../utils/utils)
 const formatCurrency = (value) => {
   if (!value || isNaN(value)) return '0 đ';
@@ -19,8 +19,6 @@ function SaleManager() {
   const [customPrices, setCustomPrices] = useState({});
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [searchInvoiceCode, setSearchInvoiceCode] = useState('');
-  const [searchedInvoice, setSearchedInvoice] = useState(null);
   const [isPriceModalOpen, setIsPriceModalOpen] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState(null);
   const [newPrice, setNewPrice] = useState('');
@@ -386,9 +384,7 @@ function SaleManager() {
                                 className="text-gray-500 hover:text-gray-700"
                                 disabled={loading}
                               >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v.01M12 12v.01M12 18v.01"></path>
-                                </svg>
+                               <IoIosPricetag className='h-7 w-7' />
                               </button>
                             </div>
                             <div className="flex flex-col gap-2">
