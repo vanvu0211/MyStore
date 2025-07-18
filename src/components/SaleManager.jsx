@@ -3,7 +3,7 @@ import { useReactToPrint } from 'react-to-print';
 import { API_URL } from '../config';
 import qrBankImage from '../assets/qr_bank.png';
 import { IoIosPricetag } from "react-icons/io";
-// Fallback formatCurrency implementation (remove if already defined in ../utils/utils)
+
 const formatCurrency = (value) => {
   if (!value || isNaN(value)) return '0 đ';
   return `${parseInt(value).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`;
@@ -97,7 +97,7 @@ function SaleManager() {
     } catch (error) {
       console.error('Error fetching invoice count:', error);
       setError('Không thể tạo mã hóa đơn');
-      return `HD${Date.now()}`; // Fallback in case of error
+      return `HD${Date.now()}`;
     }
   };
 
@@ -196,7 +196,6 @@ function SaleManager() {
     setSelectedProducts(selectedProducts.filter((p) => p.id !== id));
   };
 
-
   const prepareAndPrint = async () => {
     if (!customerName || selectedProducts.length === 0) {
       setError('Vui lòng nhập tên khách hàng và chọn ít nhất một sản phẩm');
@@ -211,7 +210,7 @@ function SaleManager() {
         customerName,
         invoiceCode,
         saleDate: new Date().toISOString(),
-        debtAmount: rawDebtAmount|| 0,
+        debtAmount: rawDebtAmount || 0,
         items: selectedProducts.map((p) => ({
           productName: p.name,
           salePrice: p.price,
@@ -318,229 +317,228 @@ function SaleManager() {
   };
 
   return (
-    <div className="p-2 max-w-full bg-gray-50 min-h-screen">
-      {error && <p className="text-red-500 mb-6 px-2 text-base leading-relaxed">{error}</p>}
-      <div className="flex gap-4">
-        {/* Product List Section */}
-        <div className="flex-1 pr-2">
-          {loading ? (
-            <div className="flex justify-center items-center h-64">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
-            </div>
-          ) : (
-            <>
-              <div className="sticky top-0 bg-gray-50 z-10 pt-2">
-                {/* <h3 className="text-2xl font-semibold text-gray-900 mb-4 leading-relaxed">Danh sách hàng hóa</h3> */}
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {categories.map((category) => (
-                    <button
-                      key={category.id}
-                      onClick={() => scrollToCategory(category.id)}
-                      className={`py-2 px-4 mb-4 rounded-md text-base font-medium transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed ${selectedCategoryId === category.id ? 'bg-orange-900 text-white' : 'bg-orange-400 text-white hover:bg-orange-600'
-                        }`}
-                      disabled={loading}
-                    >
-                      {category.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              {categories.length === 0 ? (
-                <p className="text-gray-600 text-base leading-relaxed">Không có danh mục nào để hiển thị</p>
-              ) : !selectedCategoryId ? (
-                <p className="text-gray-600 text-base leading-relaxed">Vui lòng chọn một danh mục</p>
-              ) : (
-                <div ref={categoryRef} className="mb-6">
-                  {products.length === 0 ? (
-                    <p className="text-gray-600 text-base leading-relaxed">Không có sản phẩm nào trong danh mục này</p>
-                  ) : (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-3">
-                      {products.map((product) => (
-                        <div key={product.id} className="border rounded-lg shadow-sm bg-white  hover:shadow-md transition-all duration-200 hover:scale-105 p-3">
-                          <div className="relative">
-                            <img
-                              src={product.image}
-                              alt={product.name}
-                              className="w-full h-24 object-cover mb-3 rounded-md"
-                              onError={(e) => {
-                                e.target.style.display = 'none';
-                              }}
-                            />
-                          </div>
-                          <div className="space-y-1">
-                            <h4 className="font-semibold text-gray-900  text-base line-clamp-2 min-h-[1rem]">
-                              {product.name}
-                            </h4>
-                            <div className="flex items-center gap-2">
-                              <p className="text--600 text-orange-500  font-bold text-base">
-                                {formatCurrency(product.price)}
-                              </p>
-                              <button
-                                onClick={() => {
-                                  setSelectedProductId(product.id);
-                                  setNewPrice(formatCurrency(product.price).replace(' đ', ''));
-                                  setIsPriceModalOpen(true);
-                                }}
-                                className="text-gray-500 hover:text-gray-700"
-                                disabled={loading}
-                              >
-                               <IoIosPricetag className='h-7 w-7' />
-                              </button>
-                            </div>
-                            <div className="flex flex-col gap-2">
-                              <input
-                                type="number"
-                                min="1"
-                                value={quantities[product.id] || ''}
-                                onChange={(e) => updateQuantity(product.id, e.target.value)}
-                                placeholder="Số lượng"
-                                className="border border-gray-300 p-2 rounded-md w-full text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                                disabled={loading}
-                                onFocus={(e) => e.target.select()}
-                                aria-label={`Số lượng cho ${product.name}`}
-                              />
-                              <div className="relative">
-                                <input
-                                  type="text"
-                                  value={customPrices[product.id] || ''}
-                                  onChange={(e) => updateCustomPrice(product.id, e.target.value)}
-                                  placeholder="Giá tùy chỉnh"
-                                  className="border border-gray-300 p-2 rounded-md w-full text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                                  disabled={loading}
-                                  onFocus={(e) => e.target.select()}
-                                  aria-label={`Giá tùy chỉnh cho ${product.name}`}
-                                />
-                                <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500">đ</span>
-                              </div>
-                              <button
-                                onClick={() => addProduct(product)}
-                                className="bg-orange-500 text-white py-2 px-3 rounded-md text-base font-medium hover:bg-orange-600 transition-colors duration-200 active:transform active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                                disabled={loading}
-                              >
-                                {loading ? 'Đang xử lý...' : 'Thêm vào giỏ'}
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-            </>
-          )}
-        </div>
-
-        {/* Cart Section - Always visible, not affected by loading */}
-        <div className="w-96 bg-white rounded-lg shadow-lg p-4 h-fit sticky top-4">
-          <h3 className="text-2xl font-semibold text-gray-900 mb-6 text-center leading-relaxed">Giỏ hàng</h3>
-          <input
-            type="text"
-            value={customerName}
-            onChange={(e) => setCustomerName(e.target.value)}
-            placeholder="Tên khách hàng"
-            className="border border-gray-300 p-3 rounded-md mb-6 w-full text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-            disabled={loading}
-            aria-label="Tên khách hàng"
-          />
-          <div className="max-h-96 overflow-y-auto mb-6" ref={cartRef}>
-            {selectedProducts.length === 0 ? (
-              <div className="text-center py-8 text-gray-500 text-base leading-relaxed">
-                <p>Giỏ hàng trống</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {selectedProducts.map((product, index) => (
-                  <div key={product.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-md cart-item">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-base text-gray-900 font-medium">{index + 1}. {product.name}</span>
-                        <span className="bg-orange-600 text-white text-xs font-bold px-2 py-1 rounded-full min-w-[24px] text-center">
-                          {product.quantity}
-                        </span>
-                      </div>
-                      <div className="text-sm text-gray-600">
-                        {formatCurrency(product.price)} x {product.quantity}
-                      </div>
-                    </div>
-                    <div className="text-sm text-gray-600 text-right">
-                      <div className="font-semibold text-lg text-orange-600">{formatCurrency(product.price * product.quantity)}</div>
-                      <button
-                        onClick={() => removeProduct(product.id)}
-                        className="mt-1 text-red-500 hover:text-red-700 text-sm font-medium disabled:text-gray-400 disabled:cursor-not-allowed"
-                        disabled={loading}
-                      >
-                        Xóa
-                      </button>
-                    </div>
-                  </div>
+    <div className="p-2 max-w-full bg-gray-50 min-h-screen flex flex-col md:flex-row gap-4">
+      {error && <p className="text-red-500 mb-4 px-2 text-sm md:text-base leading-relaxed">{error}</p>}
+      {/* Product List Section */}
+      <div className="flex-1 pr-0 md:pr-2">
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-8 w-8 md:h-12 md:w-12 border-t-2 border-b-2 border-orange-500"></div>
+          </div>
+        ) : (
+          <>
+            <div className="sticky top-0 bg-gray-50 z-10 pt-2">
+              <div className="flex flex-wrap gap-2 mb-4 overflow-x-auto">
+                {categories.map((category) => (
+                  <button
+                    key={category.id}
+                    onClick={() => scrollToCategory(category.id)}
+                    className={`py-1 px-3 md:py-2 md:px-4 mb-2 rounded-md text-sm md:text-base font-medium transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed ${
+                      selectedCategoryId === category.id
+                        ? 'bg-orange-900 text-white'
+                        : 'bg-orange-400 text-white hover:bg-orange-600'
+                    }`}
+                    disabled={loading}
+                  >
+                    {category.name}
+                  </button>
                 ))}
               </div>
-            )}
-          </div>
-          <div className="border-t pt-6">
-            <div className="mb-4 space-y-3">
-              <div className="relative">
-                <input
-                  type="text"
-                  value={debtAmount}
-                  onChange={(e) => updateDebtAmount(e.target.value)}
-                  placeholder="Số tiền nợ"
-                  className="border border-gray-300 p-2 rounded-md w-full text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                  disabled={loading}
-                  onFocus={(e) => e.target.select()}
-                  aria-label="Số tiền nợ"
-                />
-                <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500">đ</span>
+            </div>
+            {categories.length === 0 ? (
+              <p className="text-gray-600 text-sm md:text-base leading-relaxed">Không có danh mục nào để hiển thị</p>
+            ) : !selectedCategoryId ? (
+              <p className="text-gray-600 text-sm md:text-base leading-relaxed">Vui lòng chọn một danh mục</p>
+            ) : (
+              <div ref={categoryRef} className="mb-6">
+                {products.length === 0 ? (
+                  <p className="text-gray-600 text-sm md:text-base leading-relaxed">Không có sản phẩm nào trong danh mục này</p>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-2 md:gap-3">
+                    {products.map((product) => (
+                      <div key={product.id} className="border rounded-lg shadow-sm bg-white hover:shadow-md transition-all duration-200 hover:scale-105 p-2 md:p-3">
+                        <div className="relative">
+                          <img
+                            src={product.image}
+                            alt={product.name}
+                            className="w-full h-20 md:h-24 object-cover mb-2 md:mb-3 rounded-md"
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                            }}
+                          />
+                        </div>
+                        <div className="space-y-1 md:space-y-2">
+                          <h4 className="font-semibold text-gray-900 text-sm md:text-base line-clamp-2 min-h-[2rem] md:min-h-[1rem]">
+                            {product.name}
+                          </h4>
+                          <div className="flex items-center gap-2">
+                            <p className="text-orange-500 font-bold text-sm md:text-base">
+                              {formatCurrency(product.price)}
+                            </p>
+                            <button
+                              onClick={() => {
+                                setSelectedProductId(product.id);
+                                setNewPrice(formatCurrency(product.price).replace(' đ', ''));
+                                setIsPriceModalOpen(true);
+                              }}
+                              className="text-gray-500 hover:text-gray-700"
+                              disabled={loading}
+                            >
+                              <IoIosPricetag className='h-6 w-6 md:h-7 md:w-7' />
+                            </button>
+                          </div>
+                          <div className="flex flex-col gap-2">
+                            <input
+                              type="number"
+                              min="1"
+                              value={quantities[product.id] || ''}
+                              onChange={(e) => updateQuantity(product.id, e.target.value)}
+                              placeholder="Số lượng"
+                              className="border border-gray-300 p-1 md:p-2 rounded-md w-full text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                              disabled={loading}
+                              onFocus={(e) => e.target.select()}
+                              aria-label={`Số lượng cho ${product.name}`}
+                            />
+                            <div className="relative">
+                              <input
+                                type="text"
+                                value={customPrices[product.id] || ''}
+                                onChange={(e) => updateCustomPrice(product.id, e.target.value)}
+                                placeholder="Giá tùy chỉnh"
+                                className="border border-gray-300 p-1 md:p-2 rounded-md w-full text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                disabled={loading}
+                                onFocus={(e) => e.target.select()}
+                                aria-label={`Giá tùy chỉnh cho ${product.name}`}
+                              />
+                              <span className="absolute right-1 md:right-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">đ</span>
+                            </div>
+                            <button
+                              onClick={() => addProduct(product)}
+                              className="bg-orange-500 text-white py-1 md:py-2 px-2 md:px-3 rounded-md text-sm md:text-base font-medium hover:bg-orange-600 transition-colors duration-200 active:transform active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                              disabled={loading}
+                            >
+                              {loading ? 'Đang xử lý...' : 'Thêm vào giỏ'}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* Cart Section */}
+      <div className="w-full md:w-96 bg-white rounded-lg shadow-lg p-4 h-fit md:sticky md:top-4">
+        <h3 className="text-xl md:text-2xl font-semibold text-gray-900 mb-4 md:mb-6 text-center leading-relaxed">Giỏ hàng</h3>
+        <input
+          type="text"
+          value={customerName}
+          onChange={(e) => setCustomerName(e.target.value)}
+          placeholder="Tên khách hàng"
+          className="border border-gray-300 p-2 md:p-3 rounded-md mb-4 md:mb-6 w-full text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+          disabled={loading}
+          aria-label="Tên khách hàng"
+        />
+        <div className="max-h-80 md:max-h-96 overflow-y-auto mb-4 md:mb-6" ref={cartRef}>
+          {selectedProducts.length === 0 ? (
+            <div className="text-center py-6 md:py-8 text-gray-500 text-sm md:text-base leading-relaxed">
+              <p>Giỏ hàng trống</p>
+            </div>
+          ) : (
+            <div className="space-y-2 md:space-y-3">
+              {selectedProducts.map((product, index) => (
+                <div key={product.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-md cart-item">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-sm md:text-base text-gray-900 font-medium">{index + 1}. {product.name}</span>
+                      <span className="bg-orange-600 text-white text-xs font-bold px-2 py-1 rounded-full min-w-[24px] text-center">
+                        {product.quantity}
+                      </span>
+                    </div>
+                    <div className="text-xs md:text-sm text-gray-600">
+                      {formatCurrency(product.price)} x {product.quantity}
+                    </div>
+                  </div>
+                  <div className="text-xs md:text-sm text-gray-600 text-right">
+                    <div className="font-semibold text-base md:text-lg text-orange-600">{formatCurrency(product.price * product.quantity)}</div>
+                    <button
+                      onClick={() => removeProduct(product.id)}
+                      className="mt-1 text-red-500 hover:text-red-700 text-xs md:text-sm font-medium disabled:text-gray-400 disabled:cursor-not-allowed"
+                      disabled={loading}
+                    >
+                      Xóa
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        <div className="border-t pt-4 md:pt-6">
+          <div className="mb-4 space-y-2 md:space-y-3">
+            <div className="relative">
               <input
                 type="text"
-                value={debtDate}
-                onChange={(e) => setDebtDate(e.target.value)}
-                placeholder="Ngày nợ"
-                className="border border-gray-300 p-2 rounded-md w-full text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                value={debtAmount}
+                onChange={(e) => updateDebtAmount(e.target.value)}
+                placeholder="Số tiền nợ"
+                className="border border-gray-300 p-2 rounded-md w-full text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                 disabled={loading}
-                aria-label="Ngày nợ"
+                onFocus={(e) => e.target.select()}
+                aria-label="Số tiền nợ"
               />
+              <span className="absolute right-1 md:right-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">đ</span>
             </div>
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-base font-medium">Tổng hóa đơn:</span>
-              <span className="text-base font-semibold text-orange-600">
-                {formatCurrency(selectedProducts.reduce((sum, p) => sum + p.price * p.quantity, 0))}
-              </span>
-            </div>
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-base font-medium">Số tiền nợ:</span>
-              <span className="text-base font-semibold text-orange-600">
-                {debtAmount ? formatCurrency(getRawPrice(debtAmount)) : formatCurrency(0)}
-              </span>
-            </div>
-            <div className="flex justify-between items-center mb-6">
-              <span className="text-xl font-semibold">Tổng cộng:</span>
-              <span className="text-2xl font-bold text-orange-600">
-                {formatCurrency(calculateTotalWithDebt())}
-              </span>
-            </div>
-            <button
-              onClick={prepareAndPrint}
-              className="bg-orange-500 text-white py-3 rounded-md w-full text-base font-medium hover:bg-orange-600 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
-              disabled={!customerName || selectedProducts.length === 0 || loading}
-            >
-              {loading ? 'Đang xử lý...' : 'Xuất hóa đơn'}
-            </button>
+            <input
+              type="text"
+              value={debtDate}
+              onChange={(e) => setDebtDate(e.target.value)}
+              placeholder="Ngày nợ"
+              className="border border-gray-300 p-2 rounded-md w-full text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              disabled={loading}
+              aria-label="Ngày nợ"
+            />
           </div>
-        
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-sm md:text-base font-medium">Tổng hóa đơn:</span>
+            <span className="text-sm md:text-base font-semibold text-orange-600">
+              {formatCurrency(selectedProducts.reduce((sum, p) => sum + p.price * p.quantity, 0))}
+            </span>
+          </div>
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-sm md:text-base font-medium">Số tiền nợ:</span>
+            <span className="text-sm md:text-base font-semibold text-orange-600">
+              {debtAmount ? formatCurrency(getRawPrice(debtAmount)) : formatCurrency(0)}
+            </span>
+          </div>
+          <div className="flex justify-between items-center mb-4 md:mb-6">
+            <span className="text-lg md:text-xl font-semibold">Tổng cộng:</span>
+            <span className="text-lg md:text-2xl font-bold text-orange-600">
+              {formatCurrency(calculateTotalWithDebt())}
+            </span>
+          </div>
+          <button
+            onClick={prepareAndPrint}
+            className="bg-orange-500 text-white py-2 md:py-3 rounded-md w-full text-sm md:text-base font-medium hover:bg-orange-600 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
+            disabled={!customerName || selectedProducts.length === 0 || loading}
+          >
+            {loading ? 'Đang xử lý...' : 'Xuất hóa đơn'}
+          </button>
         </div>
       </div>
 
       {isPriceModalOpen && (
         <div className="fixed inset-0 bg-gray-300/50 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">Cập nhật giá sản phẩm</h3>
-            <p className="text-gray-600 mb-4">
+          <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-xs md:max-w-md">
+            <h3 className="text-lg md:text-xl font-semibold text-gray-900 mb-3 md:mb-4">Cập nhật giá sản phẩm</h3>
+            <p className="text-gray-600 mb-3 md:mb-4 text-sm md:text-base">
               Sản phẩm: {products.find((p) => p.id === selectedProductId)?.name || 'Không xác định'}
             </p>
-            <div className="relative mb-4">
+            <div className="relative mb-3 md:mb-4">
               <input
                 type="text"
                 value={newPrice}
@@ -554,14 +552,14 @@ function SaleManager() {
                   setNewPrice(value);
                 }}
                 placeholder="Nhập giá mới"
-                className="border border-gray-300 p-2 rounded-md w-full text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                className="border border-gray-300 p-2 rounded-md w-full text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                 disabled={loading}
                 onFocus={(e) => e.target.select()}
                 aria-label="Giá mới"
               />
-              <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500">đ</span>
+              <span className="absolute right-1 md:right-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">đ</span>
             </div>
-            {error && <p className="text-red-500 mb-4 text-base">{error}</p>}
+            {error && <p className="text-red-500 mb-3 md:mb-4 text-sm md:text-base">{error}</p>}
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => {
@@ -570,14 +568,14 @@ function SaleManager() {
                   setSelectedProductId(null);
                   setError(null);
                 }}
-                className="bg-gray-300 text-gray-900 py-2 px-4 rounded-md text-base font-medium hover:bg-gray-400 transition-colors duration-200"
+                className="bg-gray-300 text-gray-900 py-1 md:py-2 px-3 md:px-4 rounded-md text-sm md:text-base font-medium hover:bg-gray-400 transition-colors duration-200"
                 disabled={loading}
               >
                 Hủy
               </button>
               <button
                 onClick={() => updateProductPrice(selectedProductId, newPrice)}
-                className="bg-orange-500 text-white py-2 px-4 rounded-md text-base font-medium hover:bg-orange-600 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                className="bg-orange-500 text-white py-1 md:py-2 px-3 md:px-4 rounded-md text-sm md:text-base font-medium hover:bg-orange-600 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
                 disabled={loading || !newPrice}
               >
                 {loading ? 'Đang cập nhật...' : 'Cập nhật'}
@@ -591,7 +589,7 @@ function SaleManager() {
         <div className="hidden print:block">
           <div
             ref={componentRef}
-            className="w-80  text-sm font-sans bg-white text-black"
+            className="w-80 text-sm font-sans bg-white text-black"
             style={{ width: '80mm', padding: '2mm', fontSize: '13pt' }}
           >
             <div className="text-center mb-2.5">
@@ -613,29 +611,28 @@ function SaleManager() {
                 })}
               </div>
             </div>
-            <div className="mb-2 text-xl">
-  <strong>Khách:</strong> {invoiceData.customerName.toUpperCase()}
-</div>
+            <div className="mb-2 text-lg md:text-xl">
+              <strong>Khách:</strong> {invoiceData.customerName.toUpperCase()}
+            </div>
             <table className="w-full border-collapse text-lg mb-2">
               <thead>
                 <tr className="border-b border-black">
-                  <th className="text-left py-0.5 w-1/10 ">SL</th>
-                  <th className="text-center py-0.5 w-4/10 ">Sản phẩm</th>
-                  <th className="text-center py-0.5 w-1/4 ">Đơn giá</th>
+                  <th className="text-left py-0.5 w-1/10">SL</th>
+                  <th className="text-center py-0.5 w-4/10">Sản phẩm</th>
+                  <th className="text-center py-0.5 w-1/4">Đơn giá</th>
                   <th className="text-center py-0.5 w-1/4">T.tiền</th>
                 </tr>
               </thead>
               <tbody>
                 {invoiceData.items.map((item, index) => (
                   <tr key={index}>
-                     <td className=" py-0.5 border-b border-r border-dashed border-gray-400">
+                    <td className="py-0.5 border-b border-r border-dashed border-gray-400">
                       {item.quantity}
                     </td>
-                    <td className="text-center py-0.5 border-b  border-r border-dashed border-gray-400">{item.name}</td>
+                    <td className="text-center py-0.5 border-b border-r border-dashed border-gray-400">{item.name}</td>
                     <td className="text-center py-0.5 border-b border-r border-dashed border-gray-400">
                       {formatCurrency(item.price)}
                     </td>
-                   
                     <td className="text-center ml-0.5 py-0.5 border-b border-dashed border-gray-400">
                       {formatCurrency(item.price * item.quantity)}
                     </td>
@@ -661,7 +658,7 @@ function SaleManager() {
                   </div>
                 )}
               </div>
-              <div className="text-lg  font-semibold mt-0.5">
+              <div className="text-lg font-semibold mt-0.5">
                 <div className="">
                   <span className="font-normal">Tiền thanh toán:</span>{' '}
                   {formatCurrency(calculateTotalWithDebt())}
