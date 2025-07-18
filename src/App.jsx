@@ -34,7 +34,7 @@ function App() {
                   }`
                 }
               >
-                Quản lý hàng hóa
+                 Hàng hóa
               </NavLink>
               <NavLink
                 to="/category"
@@ -44,7 +44,7 @@ function App() {
                   }`
                 }
               >
-                Quản lý loại hàng hóa
+                 Loại hàng hóa
               </NavLink>
               <NavLink
                 to="/invoice"
@@ -54,7 +54,7 @@ function App() {
                   }`
                 }
               >
-                Quản lý hóa đơn
+                 Hóa đơn
               </NavLink>
             </div>
             <button
@@ -93,7 +93,7 @@ function App() {
                 }
                 onClick={() => setIsMenuOpen(false)}
               >
-                Quản lý hàng hóa
+                 Hàng hóa
               </NavLink>
               <NavLink
                 to="/category"
@@ -104,7 +104,7 @@ function App() {
                 }
                 onClick={() => setIsMenuOpen(false)}
               >
-                Quản lý loại hàng hóa
+                 Loại hàng hóa
               </NavLink>
               <NavLink
                 to="/invoice"
@@ -115,7 +115,7 @@ function App() {
                 }
                 onClick={() => setIsMenuOpen(false)}
               >
-                Quản lý hóa đơn
+                 Hóa đơn
               </NavLink>
             </div>
           )}
