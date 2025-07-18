@@ -368,11 +368,11 @@ function SaleManager() {
                             />
                           </div>
                           <div className="space-y-1">
-                            <h4 className="font-semibold text-gray-900 text-base line-clamp-2 min-h-[1rem]">
+                            <h4 className="font-semibold text-gray-900  text-base line-clamp-2 min-h-[1rem]">
                               {product.name}
                             </h4>
                             <div className="flex items-center gap-2">
-                              <p className="text--600 font-bold text-base">
+                              <p className="text--600 text-orange-500  font-bold text-base">
                                 {formatCurrency(product.price)}
                               </p>
                               <button

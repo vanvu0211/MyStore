@@ -251,7 +251,7 @@ function ProductManager() {
                 required
                 disabled={loading}
               />
-              <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500">đ</span>
+              {/* <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500">đ</span> */}
             </div>
 
             <div className="flex flex-col">
