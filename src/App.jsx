@@ -12,7 +12,7 @@ function App() {
     <Router>
       <div className="min-h-screen w-full bg-gray-50 flex flex-col">
         {/* Navigation Bar */}
-        <nav className="bg-blue-600 text-white p-4 shadow-md w-full">
+        <nav className="bg-orange-600 text-white p-4 shadow-md w-full">
           <div className="w-full flex justify-between items-center px-4">
             <h1 className="text-2xl font-bold">Tạp Hóa Văn Bằng</h1>
             <div className="hidden md:flex space-x-4">
@@ -20,7 +20,7 @@ function App() {
                 to="/"
                 className={({ isActive }) =>
                   `px-3 py-2 rounded transition-colors ${
-                    isActive ? 'bg-blue-800 text-white' : 'hover:bg-blue-700'
+                    isActive ? 'bg-orange-800 text-white' : 'hover:bg-orange-700'
                   }`
                 }
               >
@@ -30,7 +30,7 @@ function App() {
                 to="/products"
                 className={({ isActive }) =>
                   `px-3 py-2 rounded transition-colors ${
-                    isActive ? 'bg-blue-800 text-white' : 'hover:bg-blue-700'
+                    isActive ? 'bg-orange-800 text-white' : 'hover:bg-orange-700'
                   }`
                 }
               >
@@ -40,7 +40,7 @@ function App() {
                 to="/category"
                 className={({ isActive }) =>
                   `px-3 py-2 rounded transition-colors ${
-                    isActive ? 'bg-blue-800 text-white' : 'hover:bg-blue-700'
+                    isActive ? 'bg-orange-800 text-white' : 'hover:bg-orange-700'
                   }`
                 }
               >
@@ -50,7 +50,7 @@ function App() {
                 to="/invoice"
                 className={({ isActive }) =>
                   `px-3 py-2 rounded transition-colors ${
-                    isActive ? 'bg-blue-800 text-white' : 'hover:bg-blue-700'
+                    isActive ? 'bg-orange-800 text-white' : 'hover:bg-orange-700'
                   }`
                 }
               >
@@ -77,7 +77,7 @@ function App() {
                 to="/"
                 className={({ isActive }) =>
                   `block px-3 py-2 rounded transition-colors ${
-                    isActive ? 'bg-blue-800 text-white' : 'hover:bg-blue-700'
+                    isActive ? 'bg-orange-800 text-white' : 'hover:bg-orange-700'
                   }`
                 }
                 onClick={() => setIsMenuOpen(false)}
@@ -88,7 +88,7 @@ function App() {
                 to="/products"
                 className={({ isActive }) =>
                   `block px-3 py-2 rounded transition-colors ${
-                    isActive ? 'bg-blue-800 text-white' : 'hover:bg-blue-700'
+                    isActive ? 'bg-orange-800 text-white' : 'hover:bg-orange-700'
                   }`
                 }
                 onClick={() => setIsMenuOpen(false)}
@@ -99,7 +99,7 @@ function App() {
                 to="/category"
                 className={({ isActive }) =>
                   `block px-3 py-2 rounded transition-colors ${
-                    isActive ? 'bg-blue-800 text-white' : 'hover:bg-blue-700'
+                    isActive ? 'bg-orange-800 text-white' : 'hover:bg-orange-700'
                   }`
                 }
                 onClick={() => setIsMenuOpen(false)}
@@ -110,7 +110,7 @@ function App() {
                 to="/invoice"
                 className={({ isActive }) =>
                   `block px-3 py-2 rounded transition-colors ${
-                    isActive ? 'bg-blue-800 text-white' : 'hover:bg-blue-700'
+                    isActive ? 'bg-orange-800 text-white' : 'hover:bg-orange-700'
                   }`
                 }
                 onClick={() => setIsMenuOpen(false)}

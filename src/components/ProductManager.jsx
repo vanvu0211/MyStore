@@ -213,7 +213,7 @@ function ProductManager() {
       {error && <p className="text-red-500 mb-4">{error}</p>}
       {loading ? (
         <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
         </div>
       ) : (
         <>
@@ -223,14 +223,14 @@ function ProductManager() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Tên hàng hóa"
-              className="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
               required
               disabled={loading}
             />
             <select
               value={categoryId}
               onChange={(e) => setCategoryId(e.target.value)}
-              className="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
               required
               disabled={loading}
             >
@@ -247,7 +247,7 @@ function ProductManager() {
                 value={price}
                 onChange={handlePriceChange}
                 placeholder="Giá (VD: 100.000)"
-                className="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+                className="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-orange-500 w-full"
                 required
                 disabled={loading}
               />
@@ -269,7 +269,7 @@ function ProductManager() {
             </div>
             <button
               type="submit"
-              className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 col-span-2 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+              className="bg-orange-500 text-white p-2 rounded hover:bg-orange-600 col-span-2 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
               disabled={loading}
             >
               {loading ? 'Đang xử lý...' : editId ? 'Cập nhật' : 'Thêm'}
@@ -282,7 +282,7 @@ function ProductManager() {
             categories.map((category) => (
               groupedProducts[category.id]?.length > 0 && (
                 <div key={category.id} className="mb-6">
-                  <h4 className="text-xl font-bold text-blue-700 bg-blue-200 mb-4 border-b pb-2 leading-relaxed">{category.name}</h4>
+                  <h4 className="text-xl font-bold text-orange-700 bg-orange-200 mb-4 border-b pb-2 leading-relaxed">{category.name}</h4>
                   <table className="w-full border-collapse">
                     <thead>
                       <tr className="bg-gray-100 text-gray-900">

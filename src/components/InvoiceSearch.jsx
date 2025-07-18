@@ -50,13 +50,13 @@ function InvoiceSearch() {
               value={searchInvoiceCode}
               onChange={(e) => setSearchInvoiceCode(e.target.value)}
               placeholder="Nhập mã hóa đơn"
-              className="border border-gray-200 p-3 rounded-lg w-full text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 sm:text-base"
+              className="border border-gray-200 p-3 rounded-lg w-full text-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 sm:text-base"
               disabled={loading}
               aria-label="Mã hóa đơn"
             />
             <button
               onClick={fetchInvoiceByCode}
-              className="bg-blue-600 text-white py-3 px-6 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed whitespace-nowrap sm:text-base"
+              className="bg-orange-600 text-white py-3 px-6 rounded-lg text-lg font-semibold hover:bg-orange-700 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed whitespace-nowrap sm:text-base"
               disabled={loading}
             >
               {loading ? 'Đang tìm...' : 'Tìm kiếm'}
@@ -83,7 +83,7 @@ function InvoiceSearch() {
                   <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                       <thead>
-                        <tr className="bg-blue-200">
+                        <tr className="bg-orange-200">
                           <th className="p-3 text-base font-semibold text-gray-700 border-b sm:text-sm">Tên</th>
                           <th className="p-3 text-base font-semibold text-gray-700 border-b sm:text-sm">SL</th>
                           <th className="p-3 text-base font-semibold text-gray-700 border-b sm:text-sm">Giá bán</th>
