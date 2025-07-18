@@ -35,7 +35,7 @@ function InvoiceSearch() {
   };
 
   return (
-    <div className="flex justify-center  min-h-screen bg-gray-100 px-0 py-6 sm:px-6">
+    <div className="flex justify-center  min-h-screen px-0 py-6 sm:px-6">
       <div className="w-full max-w-3xl">
         <h3 className="text-4xl font-bold text-gray-900 mb-8 text-center sm:text-3xl">Tìm kiếm hóa đơn</h3>
         {error && (

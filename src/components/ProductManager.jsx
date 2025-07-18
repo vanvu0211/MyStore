@@ -66,7 +66,7 @@ function ProductManager() {
       return;
     }
 
-    const allowedTypes = ['image/jpeg', 'image/png'];
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
     if (!allowedTypes.includes(file.type)) {
       setError('Chỉ chấp nhận file ảnh (JPEG, PNG)!');
       e.target.value = '';
@@ -209,7 +209,7 @@ function ProductManager() {
 
   return (
     <div className="p-6">
-      <h2 className="text-2xl font-bold text-gray-900 mb-4">Quản lý hàng hóa</h2>
+      {/* <h2 className="text-2xl font-bold text-gray-900 mb-4">Quản lý hàng hóa</h2> */}
       {error && <p className="text-red-500 mb-4">{error}</p>}
       {loading ? (
         <div className="flex justify-center items-center h-64">
@@ -253,17 +253,16 @@ function ProductManager() {
               />
               <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500">đ</span>
             </div>
+
             <div className="flex flex-col">
               <input
                 type="file"
-                accept="image/jpeg,image/png"
+                accept="image/jpeg,image/png,image/webp"
                 onChange={handleImageChange}
                 className="border p-2 rounded"
                 disabled={loading}
               />
-              <p className="text-gray-600 text-sm mt-1">
-                Ảnh lớn hơn 300KB sẽ được nén xuống ~300KB. Định dạng: JPEG, PNG.
-              </p>
+             
               {imagePreview && (
                 <img src={imagePreview} alt="Preview" className="mt-2 w-32 h-32 object-cover rounded" />
               )}
@@ -276,7 +275,7 @@ function ProductManager() {
               {loading ? 'Đang xử lý...' : editId ? 'Cập nhật' : 'Thêm'}
             </button>
           </form>
-          <p className="text-yellow-600 mb-4">Lưu ý: Ảnh được lưu dưới dạng chuỗi base64.</p>
+         
           {categories.length === 0 && products.length === 0 ? (
             <p className="text-gray-600 text-base leading-relaxed">Không có sản phẩm hoặc danh mục nào để hiển thị</p>
           ) : (

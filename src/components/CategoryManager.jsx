@@ -80,7 +80,7 @@ function CategoryManager() {
 
   return (
     <div className="p-6">
-      <h2 className="text-2xl font-bold text-gray-800 mb-4 dark:text-gray-100">Quản lý loại hàng hóa</h2>
+      {/* <h2 className="text-2xl font-bold text-gray-800 mb-4 dark:text-gray-100">Quản lý loại hàng hóa</h2> */}
       {error && <p className="text-red-500 mb-4">{error}</p>}
       {loading ? (
         <div className="flex justify-center items-center h-64">

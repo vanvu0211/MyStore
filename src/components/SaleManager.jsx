@@ -330,13 +330,13 @@ function SaleManager() {
           ) : (
             <>
               <div className="sticky top-0 bg-gray-50 z-10 pt-2">
-                <h3 className="text-2xl font-semibold text-gray-900 mb-4 leading-relaxed">Danh sách hàng hóa</h3>
+                {/* <h3 className="text-2xl font-semibold text-gray-900 mb-4 leading-relaxed">Danh sách hàng hóa</h3> */}
                 <div className="flex flex-wrap gap-2 mb-4">
                   {categories.map((category) => (
                     <button
                       key={category.id}
                       onClick={() => scrollToCategory(category.id)}
-                      className={`py-2 px-4 rounded-md text-base font-medium transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed ${selectedCategoryId === category.id ? 'bg-blue-900 text-white' : 'bg-blue-400 text-white hover:bg-blue-600'
+                      className={`py-2 px-4 mb-4 rounded-md text-base font-medium transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed ${selectedCategoryId === category.id ? 'bg-blue-900 text-white' : 'bg-blue-400 text-white hover:bg-blue-600'
                         }`}
                       disabled={loading}
                     >
