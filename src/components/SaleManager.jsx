@@ -605,32 +605,15 @@ function SaleManager() {
       {isInvoicePreviewOpen && invoiceData && (
   <div className="fixed inset-0 bg-gray-300/50 bg-opacity-50 flex items-center justify-center z-50">
     <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-xs md:max-w-md">
-      <h3 className="text-lg md:text-xl font-semibold text-gray-900 mb-3 md:mb-4">Xem trước hóa đơn</h3>
       <div className="w-full text-sm font-sans bg-white text-black mb-4 md:mb-6">
-        <div className="text-center mb-2.5">
-          <div className="font-bold text-lg">Tạp hóa Văn Bằng</div>
-          <div className="text-[13px] leading-tight">
-            0966900544 - Thôn 5, Quảng Tín, Đắk R Lấp
-          </div>
-        </div>
         <div className="text-center my-2.5">
-          <div className="font-bold text-[16px]">HÓA ĐƠN TẠM TÍNH</div>
-          <div className="text-[13px]">Mã hóa đơn: {invoiceData.invoiceCode}</div>
-          <div className="text-[13px]">
-            {new Date(invoiceData.saleDate).toLocaleDateString('vi-VN', {
-              day: '2-digit',
-              month: '2-digit',
-              year: '2-digit',
-              hour: '2-digit',
-              minute: '2-digit',
-            })}
-          </div>
+          <div className="text-[20px] font-bold">Mã hóa đơn: {invoiceData.invoiceCode}</div>      
         </div>
         <div className="mb-2 text-lg md:text-xl">
           <strong>Khách:</strong> {invoiceData.customerName.toUpperCase()}
         </div>
         {/* Thêm div bao quanh bảng với max-h và overflow-y-auto */}
-        <div className="max-h-[300px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
+        <div className="max-h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
           <table className="w-full border-collapse text-lg mb-2">
             <thead>
               <tr className="border-b border-black">
@@ -685,20 +668,7 @@ function SaleManager() {
         </div>
         <div className="my-2.5 text-[13px]">
           <div className="border-t border-black mb-2"></div>
-          <div className="flex items-center justify-between">
-            <img
-              src={qrBankImage}
-              alt="QR Code Ngân hàng"
-              className="w-[25mm] h-[25mm]"
-            />
-            <div
-              className="text-base leading-tight text-right font-semibold mr-[5mm]"
-            >
-              <div>LP Bank</div>
-              <div>THAI THI LIEU</div>
-              <div>3377226666</div>
-            </div>
-          </div>
+         
         </div>
       </div>
       <div className="flex justify-end gap-2">
