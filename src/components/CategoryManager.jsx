@@ -84,7 +84,7 @@ function CategoryManager() {
       {error && <p className="text-red-500 mb-4">{error}</p>}
       {loading ? (
         <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
         </div>
       ) : (
         <>
@@ -94,13 +94,13 @@ function CategoryManager() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Tên loại hàng hóa"
-              className="border p-2 rounded flex-grow focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border p-2 rounded flex-grow focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
               disabled={loading}
             />
             <button
               type="submit"
-              className="bg-orange-600 text-white p-2 rounded hover:bg-orange-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+              className="bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
               disabled={loading}
             >
               {loading ? 'Đang xử lý...' : editId ? 'Cập nhật' : 'Thêm'}

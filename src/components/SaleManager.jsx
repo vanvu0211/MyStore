@@ -323,7 +323,7 @@ function SaleManager() {
       <div className="flex-1 pr-0 md:pr-2">
         {loading ? (
           <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-8 w-8 md:h-12 md:w-12 border-t-2 border-b-2 border-orange-500"></div>
+            <div className="animate-spin rounded-full h-8 w-8 md:h-12 md:w-12 border-t-2 border-b-2 border-blue-500"></div>
           </div>
         ) : (
           <>
@@ -335,8 +335,8 @@ function SaleManager() {
                     onClick={() => scrollToCategory(category.id)}
                     className={`py-1 px-3 md:py-2 md:px-4 mb-2 rounded-md text-sm md:text-base font-medium transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed ${
                       selectedCategoryId === category.id
-                        ? 'bg-orange-900 text-white'
-                        : 'bg-orange-400 text-white hover:bg-orange-600'
+                        ? 'bg-blue-900 text-white'
+                        : 'bg-blue-400 text-white hover:bg-blue-600'
                     }`}
                     disabled={loading}
                   >
@@ -372,7 +372,7 @@ function SaleManager() {
                             {product.name}
                           </h4>
                           <div className="flex items-center gap-2">
-                            <p className="text-orange-500 font-bold text-sm md:text-base">
+                            <p className="text-blue-500 font-bold text-sm md:text-base">
                               {formatCurrency(product.price)}
                             </p>
                             <button
@@ -394,7 +394,7 @@ function SaleManager() {
                               value={quantities[product.id] || ''}
                               onChange={(e) => updateQuantity(product.id, e.target.value)}
                               placeholder="Số lượng"
-                              className="border border-gray-300 p-1 md:p-2 rounded-md w-full text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                              className="border border-gray-300 p-1 md:p-2 rounded-md w-full text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                               disabled={loading}
                               onFocus={(e) => e.target.select()}
                               aria-label={`Số lượng cho ${product.name}`}
@@ -405,7 +405,7 @@ function SaleManager() {
                                 value={customPrices[product.id] || ''}
                                 onChange={(e) => updateCustomPrice(product.id, e.target.value)}
                                 placeholder="Giá tùy chỉnh"
-                                className="border border-gray-300 p-1 md:p-2 rounded-md w-full text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                className="border border-gray-300 p-1 md:p-2 rounded-md w-full text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 disabled={loading}
                                 onFocus={(e) => e.target.select()}
                                 aria-label={`Giá tùy chỉnh cho ${product.name}`}
@@ -414,7 +414,7 @@ function SaleManager() {
                             </div>
                             <button
                               onClick={() => addProduct(product)}
-                              className="bg-orange-500 text-white py-1 md:py-2 px-2 md:px-3 rounded-md text-sm md:text-base font-medium hover:bg-orange-600 transition-colors duration-200 active:transform active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                              className="bg-blue-500 text-white py-1 md:py-2 px-2 md:px-3 rounded-md text-sm md:text-base font-medium hover:bg-blue-600 transition-colors duration-200 active:transform active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed"
                               disabled={loading}
                             >
                               {loading ? 'Đang xử lý...' : 'Thêm vào giỏ'}
@@ -439,7 +439,7 @@ function SaleManager() {
           value={customerName}
           onChange={(e) => setCustomerName(e.target.value)}
           placeholder="Tên khách hàng"
-          className="border border-gray-300 p-2 md:p-3 rounded-md mb-4 md:mb-6 w-full text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+          className="border border-gray-300 p-2 md:p-3 rounded-md mb-4 md:mb-6 w-full text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           disabled={loading}
           aria-label="Tên khách hàng"
         />
@@ -455,7 +455,7 @@ function SaleManager() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-sm md:text-base text-gray-900 font-medium">{index + 1}. {product.name}</span>
-                      <span className="bg-orange-600 text-white text-xs font-bold px-2 py-1 rounded-full min-w-[24px] text-center">
+                      <span className="bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded-full min-w-[24px] text-center">
                         {product.quantity}
                       </span>
                     </div>
@@ -464,7 +464,7 @@ function SaleManager() {
                     </div>
                   </div>
                   <div className="text-xs md:text-sm text-gray-600 text-right">
-                    <div className="font-semibold text-base md:text-lg text-orange-600">{formatCurrency(product.price * product.quantity)}</div>
+                    <div className="font-semibold text-base md:text-lg text-blue-600">{formatCurrency(product.price * product.quantity)}</div>
                     <button
                       onClick={() => removeProduct(product.id)}
                       className="mt-1 text-red-500 hover:text-red-700 text-xs md:text-sm font-medium disabled:text-gray-400 disabled:cursor-not-allowed"
@@ -486,7 +486,7 @@ function SaleManager() {
                 value={debtAmount}
                 onChange={(e) => updateDebtAmount(e.target.value)}
                 placeholder="Số tiền nợ"
-                className="border border-gray-300 p-2 rounded-md w-full text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                className="border border-gray-300 p-2 rounded-md w-full text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 disabled={loading}
                 onFocus={(e) => e.target.select()}
                 aria-label="Số tiền nợ"
@@ -498,32 +498,32 @@ function SaleManager() {
               value={debtDate}
               onChange={(e) => setDebtDate(e.target.value)}
               placeholder="Ngày nợ"
-              className="border border-gray-300 p-2 rounded-md w-full text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              className="border border-gray-300 p-2 rounded-md w-full text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               disabled={loading}
               aria-label="Ngày nợ"
             />
           </div>
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm md:text-base font-medium">Tổng hóa đơn:</span>
-            <span className="text-sm md:text-base font-semibold text-orange-600">
+            <span className="text-sm md:text-base font-semibold text-blue-600">
               {formatCurrency(selectedProducts.reduce((sum, p) => sum + p.price * p.quantity, 0))}
             </span>
           </div>
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm md:text-base font-medium">Số tiền nợ:</span>
-            <span className="text-sm md:text-base font-semibold text-orange-600">
+            <span className="text-sm md:text-base font-semibold text-blue-600">
               {debtAmount ? formatCurrency(getRawPrice(debtAmount)) : formatCurrency(0)}
             </span>
           </div>
           <div className="flex justify-between items-center mb-4 md:mb-6">
             <span className="text-lg md:text-xl font-semibold">Tổng cộng:</span>
-            <span className="text-lg md:text-2xl font-bold text-orange-600">
+            <span className="text-lg md:text-2xl font-bold text-blue-600">
               {formatCurrency(calculateTotalWithDebt())}
             </span>
           </div>
           <button
             onClick={prepareAndPrint}
-            className="bg-orange-500 text-white py-2 md:py-3 rounded-md w-full text-sm md:text-base font-medium hover:bg-orange-600 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
+            className="bg-blue-500 text-white py-2 md:py-3 rounded-md w-full text-sm md:text-base font-medium hover:bg-blue-600 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
             disabled={!customerName || selectedProducts.length === 0 || loading}
           >
             {loading ? 'Đang xử lý...' : 'Xuất hóa đơn'}
@@ -552,7 +552,7 @@ function SaleManager() {
                   setNewPrice(value);
                 }}
                 placeholder="Nhập giá mới"
-                className="border border-gray-300 p-2 rounded-md w-full text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                className="border border-gray-300 p-2 rounded-md w-full text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 disabled={loading}
                 onFocus={(e) => e.target.select()}
                 aria-label="Giá mới"
@@ -575,7 +575,7 @@ function SaleManager() {
               </button>
               <button
                 onClick={() => updateProductPrice(selectedProductId, newPrice)}
-                className="bg-orange-500 text-white py-1 md:py-2 px-3 md:px-4 rounded-md text-sm md:text-base font-medium hover:bg-orange-600 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                className="bg-blue-500 text-white py-1 md:py-2 px-3 md:px-4 rounded-md text-sm md:text-base font-medium hover:bg-blue-600 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
                 disabled={loading || !newPrice}
               >
                 {loading ? 'Đang cập nhật...' : 'Cập nhật'}

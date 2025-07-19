@@ -56,7 +56,7 @@ function InvoiceSearch() {
             />
             <button
               onClick={fetchInvoiceByCode}
-              className="bg-orange-600 text-white py-3 px-6 rounded-lg text-lg font-semibold hover:bg-orange-700 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed whitespace-nowrap sm:text-base"
+              className="bg-blue text-white py-3 px-6 rounded-lg text-lg font-semibold hover:bg-orange-700 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed whitespace-nowrap sm:text-base"
               disabled={loading}
             >
               {loading ? 'Đang tìm...' : 'Tìm kiếm'}
