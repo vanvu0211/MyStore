@@ -31,22 +31,23 @@ function SaleManager() {
   const cartRef = useRef();
   const categoryRef = useRef(null);
 
+   const clearCart = () => {
+    setInvoiceData(null);
+    setSelectedProducts([]);
+    setCustomerName('');
+    setQuantities({});
+    setCustomPrices({});
+    setDebtAmount('');
+    setDebtDate('');
+  };
+
   const handlePrint = useReactToPrint({
     contentRef: componentRef,
     documentTitle: `Invoice_${customerName}_${new Date().toISOString()}`,
     onBeforePrint: async () => {
       await saveInvoice();
     },
-    onAfterPrint: () => {
-      setInvoiceData(null);
-      setSelectedProducts([]);
-      setCustomerName('');
-      setQuantities({});
-      setCustomPrices({});
-      setDebtAmount('');
-      setDebtDate('');
-      setIsInvoicePreviewOpen(false);
-    },
+    onAfterPrint: clearCart,
   });
 
   useEffect(() => {
@@ -350,11 +351,10 @@ function SaleManager() {
                   <button
                     key={category.id}
                     onClick={() => scrollToCategory(category.id)}
-                    className={`py-1 px-3 md:py-2 md:px-4 mb-2 rounded-md text-sm md:text-base font-medium transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed ${
-                      selectedCategoryId === category.id
+                    className={`py-1 px-3 md:py-2 md:px-4 mb-2 rounded-md text-sm md:text-base font-medium transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed ${selectedCategoryId === category.id
                         ? 'bg-blue-900 text-white'
                         : 'bg-blue-400 text-white hover:bg-blue-600'
-                    }`}
+                      }`}
                     disabled={loading}
                   >
                     {category.name}
@@ -538,13 +538,23 @@ function SaleManager() {
               {formatCurrency(calculateTotalWithDebt())}
             </span>
           </div>
-          <button
-            onClick={prepareInvoicePreview}
-            className="bg-blue-500 text-white py-2 md:py-3 rounded-md w-full text-sm md:text-base font-medium hover:bg-blue-600 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
-            disabled={!customerName || selectedProducts.length === 0 || loading}
-          >
-            {loading ? 'Đang xử lý...' : 'Xem trước hóa đơn'}
-          </button>
+          <div className='flex gap-2'>
+            <button
+              onClick={prepareInvoicePreview}
+              className="bg-blue-500 text-white py-2 md:py-3 rounded-md w-full text-sm md:text-base font-medium hover:bg-blue-600 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              disabled={!customerName || selectedProducts.length === 0 || loading}
+            >
+              {loading ? 'Đang xử lý...' : 'Xem trước hóa đơn'}
+            </button>
+             <button
+              onClick={clearCart}
+              className="bg-red-500 text-white py-2 md:py-3 rounded-md w-full text-sm md:text-base font-medium hover:bg-red-600 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              disabled={!customerName || selectedProducts.length === 0 || loading}
+            >
+              {loading ? 'Đang xử lý...' : 'Xóa giỏ hàng'}
+            </button>
+          </div>
+
         </div>
       </div>
 
@@ -603,97 +613,97 @@ function SaleManager() {
       )}
 
       {isInvoicePreviewOpen && invoiceData && (
-  <div className="fixed inset-0 bg-gray-300/50 bg-opacity-50 flex items-center justify-center z-50">
-    <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-xs md:max-w-md">
-      <div className="w-full text-sm font-sans bg-white text-black mb-4 md:mb-6">
-        <div className="text-center my-2.5">
-          <div className="text-[20px] font-bold">Mã hóa đơn: {invoiceData.invoiceCode}</div>      
-        </div>
-        <div className="mb-2 text-lg md:text-xl">
-          <strong>Khách:</strong> {invoiceData.customerName.toUpperCase()}
-        </div>
-        {/* Thêm div bao quanh bảng với max-h và overflow-y-auto */}
-        <div className="max-h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
-          <table className="w-full border-collapse text-lg mb-2">
-            <thead>
-              <tr className="border-b border-black">
-                <th className="text-left py-0.5 w-[10%]">SL</th>
-                <th className="text-center py-0.5 w-[40%]">Sản phẩm</th>
-                <th className="text-center py-0.5 w-1/4">Đơn giá</th>
-                <th className="text-center py-0.5 w-1/4">T.tiền</th>
-              </tr>
-            </thead>
-            <tbody>
-              {invoiceData.items.map((item, index) => (
-                <tr key={index}>
-                  <td className="py-0.5 border-b border-r border-dashed border-gray-400">
-                    {item.quantity}
-                  </td>
-                  <td className="text-center py-0.5 border-b border-r border-dashed border-gray-400">{item.name}</td>
-                  <td className="text-center py-0.5 border-b border-r border-dashed border-gray-400">
-                    {formatCurrency(item.price)}
-                  </td>
-                  <td className="text-center py-0.5 border-b border-dashed border-gray-400">
-                    {formatCurrency(item.price * item.quantity)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <div className="border-t border-black pt-1.5 mb-2.5 text-right text-[14px]">
-          <div className="border-b border-gray-300 pb-1 mb-1">
-            Tổng: <span className="font-semibold">
-              {invoiceData.items.reduce((sum, p) => sum + p.quantity, 0)} sản phẩm
-            </span>
-          </div>
-          <div className="text-lg font-semibold mt-0.5">
-            <div className="border-b border-gray-300 pb-1 mb-1">
-              <span className="font-normal">Tổng hóa đơn:</span>{' '}
-              {formatCurrency(invoiceData.items.reduce((sum, p) => sum + p.price * p.quantity, 0))}
-            </div>
-            {debtAmount !== '' && (
-              <div className="border-b border-gray-300 pb-1 mb-1">
-                <span className="font-normal">Tiền nợ :</span>{' '}
-                {formatCurrency(getRawPrice(debtAmount))}
+        <div className="fixed inset-0 bg-gray-300/50 bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-xs md:max-w-md">
+            <div className="w-full text-sm font-sans bg-white text-black mb-4 md:mb-6">
+              <div className="text-center my-2.5">
+                <div className="text-[20px] font-bold">Mã hóa đơn: {invoiceData.invoiceCode}</div>
               </div>
-            )}
-          </div>
-          <div className="text-lg font-semibold mt-0.5">
-            <div>
-              <span className="font-normal">Tiền thanh toán:</span>{' '}
-              {formatCurrency(calculateTotalWithDebt())}
+              <div className="mb-2 text-lg md:text-xl">
+                <strong>Khách:</strong> {invoiceData.customerName.toUpperCase()}
+              </div>
+              {/* Thêm div bao quanh bảng với max-h và overflow-y-auto */}
+              <div className="max-h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
+                <table className="w-full border-collapse text-lg mb-2">
+                  <thead>
+                    <tr className="border-b border-black">
+                      <th className="text-left py-0.5 w-[10%]">SL</th>
+                      <th className="text-center py-0.5 w-[40%]">Sản phẩm</th>
+                      <th className="text-center py-0.5 w-1/4">Đơn giá</th>
+                      <th className="text-center py-0.5 w-1/4">T.tiền</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {invoiceData.items.map((item, index) => (
+                      <tr key={index}>
+                        <td className="py-0.5 border-b border-r border-dashed border-gray-400">
+                          {item.quantity}
+                        </td>
+                        <td className="text-center py-0.5 border-b border-r border-dashed border-gray-400">{item.name}</td>
+                        <td className="text-center py-0.5 border-b border-r border-dashed border-gray-400">
+                          {formatCurrency(item.price)}
+                        </td>
+                        <td className="text-center py-0.5 border-b border-dashed border-gray-400">
+                          {formatCurrency(item.price * item.quantity)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="border-t border-black pt-1.5 mb-2.5 text-right text-[14px]">
+                <div className="border-b border-gray-300 pb-1 mb-1">
+                  Tổng: <span className="font-semibold">
+                    {invoiceData.items.reduce((sum, p) => sum + p.quantity, 0)} sản phẩm
+                  </span>
+                </div>
+                <div className="text-lg font-semibold mt-0.5">
+                  <div className="border-b border-gray-300 pb-1 mb-1">
+                    <span className="font-normal">Tổng hóa đơn:</span>{' '}
+                    {formatCurrency(invoiceData.items.reduce((sum, p) => sum + p.price * p.quantity, 0))}
+                  </div>
+                  {debtAmount !== '' && (
+                    <div className="border-b border-gray-300 pb-1 mb-1">
+                      <span className="font-normal">Tiền nợ :</span>{' '}
+                      {formatCurrency(getRawPrice(debtAmount))}
+                    </div>
+                  )}
+                </div>
+                <div className="text-lg font-semibold mt-0.5">
+                  <div>
+                    <span className="font-normal">Tiền thanh toán:</span>{' '}
+                    {formatCurrency(calculateTotalWithDebt())}
+                  </div>
+                </div>
+              </div>
+              <div className="my-2.5 text-[13px]">
+                <div className="border-t border-black mb-2"></div>
+
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => {
+                  setIsInvoicePreviewOpen(false);
+                  setInvoiceData(null);
+                  setError(null);
+                }}
+                className="bg-gray-300 text-gray-900 py-1 md:py-2 px-3 md:px-4 rounded-md text-sm md:text-base font-medium hover:bg-gray-400 transition-colors duration-200"
+                disabled={loading}
+              >
+                Hủy
+              </button>
+              <button
+                onClick={handlePrint}
+                className="bg-blue-500 text-white py-1 md:py-2 px-3 md:px-4 rounded-md text-sm md:text-base font-medium hover:bg-blue-600 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                disabled={loading}
+              >
+                {loading ? 'Đang in...' : 'In hóa đơn'}
+              </button>
             </div>
           </div>
         </div>
-        <div className="my-2.5 text-[13px]">
-          <div className="border-t border-black mb-2"></div>
-         
-        </div>
-      </div>
-      <div className="flex justify-end gap-2">
-        <button
-          onClick={() => {
-            setIsInvoicePreviewOpen(false);
-            setInvoiceData(null);
-            setError(null);
-          }}
-          className="bg-gray-300 text-gray-900 py-1 md:py-2 px-3 md:px-4 rounded-md text-sm md:text-base font-medium hover:bg-gray-400 transition-colors duration-200"
-          disabled={loading}
-        >
-          Hủy
-        </button>
-        <button
-          onClick={handlePrint}
-          className="bg-blue-500 text-white py-1 md:py-2 px-3 md:px-4 rounded-md text-sm md:text-base font-medium hover:bg-blue-600 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
-          disabled={loading}
-        >
-          {loading ? 'Đang in...' : 'In hóa đơn'}
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+      )}
 
       {invoiceData && (
         <div className="hidden print:block">
