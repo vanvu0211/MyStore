@@ -15,6 +15,7 @@ function InvoiceSearch() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [listLoading, setListLoading] = useState(false);
+  const [totalInvoicesAmount, setTotalInvoicesAmount] = useState(0); // New state for total amount
 
   // Fetch invoices by date
   const fetchInvoicesByDate = useCallback(async () => {
@@ -38,6 +39,12 @@ function InvoiceSearch() {
       setListLoading(false);
     }
   }, [selectedDate]);
+
+  // Calculate total amount of invoices whenever invoicesByDate changes
+  useEffect(() => {
+    const total = invoicesByDate.reduce((sum, invoice) => sum + (invoice.totalAmount || 0), 0);
+    setTotalInvoicesAmount(total);
+  }, [invoicesByDate]);
 
   useEffect(() => {
     fetchInvoicesByDate();
@@ -152,56 +159,62 @@ function InvoiceSearch() {
               </svg>
             </div>
           ) : invoicesByDate.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-blue-200">
-                    <th className="p-3 text-base font-semibold text-gray-700 border-b sm:text-sm">
-                      Mã hóa đơn
-                    </th>
-                    <th className="p-3 text-base font-semibold text-gray-700 border-b sm:text-sm">
-                      Khách hàng
-                    </th>
-                    <th className="p-3 text-base font-semibold text-gray-700 border-b sm:text-sm">
-                      Tổng tiền
-                    </th>
-                    <th className="p-3 text-base font-semibold text-gray-700 border-b sm:text-sm">
-                      Hành động
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {invoicesByDate.map((invoice) => (
-                    <tr key={invoice.invoiceCode} className="border-b hover:bg-gray-50">
-                      <td
-                        className="p-3 text-base sm:text-sm cursor-pointer hover:text-blue-600"
-                        onClick={() => handleInvoiceSelect(invoice.invoiceCode)}
-                        role="button"
-                        tabIndex={0}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' || e.key === ' ') {
-                            handleInvoiceSelect(invoice.invoiceCode);
-                          }
-                        }}
-                      >
-                        {invoice.invoiceCode}
-                      </td>
-                      <td className="p-3 text-base sm:text-sm">{invoice.customerName}</td>
-                      <td className="p-3 text-base sm:text-sm">{formatCurrency(invoice.totalAmount)}</td>
-                      <td className="p-3 text-base sm:text-sm">
-                        <button
-                          onClick={() => handleDeleteInvoice(invoice.invoiceCode)}
-                          className="bg-red-600 text-white py-1 px-3 rounded-lg text-sm font-semibold hover:bg-red-700 transition-colors duration-200"
-                          aria-label={`Xóa hóa đơn ${invoice.invoiceCode}`}
-                        >
-                          Xóa
-                        </button>
-                      </td>
+            <>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-blue-200">
+                      <th className="p-3 text-base font-semibold text-gray-700 border-b sm:text-sm">
+                        Mã hóa đơn
+                      </th>
+                      <th className="p-3 text-base font-semibold text-gray-700 border-b sm:text-sm">
+                        Khách hàng
+                      </th>
+                      <th className="p-3 text-base font-semibold text-gray-700 border-b sm:text-sm">
+                        Tổng tiền
+                      </th>
+                      <th className="p-3 text-base font-semibold text-gray-700 border-b sm:text-sm">
+                        Hành động
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {invoicesByDate.map((invoice) => (
+                      <tr key={invoice.invoiceCode} className="border-b hover:bg-gray-50">
+                        <td
+                          className="p-3 text-base sm:text-sm cursor-pointer hover:text-blue-600"
+                          onClick={() => handleInvoiceSelect(invoice.invoiceCode)}
+                          role="button"
+                          tabIndex={0}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              handleInvoiceSelect(invoice.invoiceCode);
+                            }
+                          }}
+                        >
+                          {invoice.invoiceCode}
+                        </td>
+                        <td className="p-3 text-base sm:text-sm">{invoice.customerName}</td>
+                        <td className="p-3 text-base sm:text-sm">{formatCurrency(invoice.totalAmount)}</td>
+                        <td className="p-3 text-base sm:text-sm">
+                          <button
+                            onClick={() => handleDeleteInvoice(invoice.invoiceCode)}
+                            className="bg-red-600 text-white py-1 px-3 rounded-lg text-sm font-semibold hover:bg-red-700 transition-colors duration-200"
+                            aria-label={`Xóa hóa đơn ${invoice.invoiceCode}`}
+                          >
+                            Xóa
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {/* Display Total Amount */}
+              <div className="mt-4 text-lg font-semibold text-gray-900 sm:text-base">
+                Tổng tiền tất cả hóa đơn: {formatCurrency(totalInvoicesAmount)}
+              </div>
+            </>
           ) : (
             <p className="text-center text-lg text-gray-600 sm:text-base">
               Không có hóa đơn nào cho ngày này
