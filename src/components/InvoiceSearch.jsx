@@ -42,7 +42,7 @@ function InvoiceSearch() {
 
   // Calculate total amount of invoices whenever invoicesByDate changes
   useEffect(() => {
-    const total = invoicesByDate.reduce((sum, invoice) => sum + (invoice.totalAmount || 0), 0);
+    const total = invoicesByDate.reduce((sum, invoice) => sum + (invoice.totalAmount + invoice.debtAmount || 0), 0);
     setTotalInvoicesAmount(total);
   }, [invoicesByDate]);
 
@@ -195,7 +195,7 @@ function InvoiceSearch() {
                           {invoice.invoiceCode}
                         </td>
                         <td className="p-3 text-base sm:text-sm">{invoice.customerName}</td>
-                        <td className="p-3 text-base sm:text-sm">{formatCurrency(invoice.totalAmount)}</td>
+                        <td className="p-3 text-base sm:text-sm">{formatCurrency(invoice.totalAmount + invoice.debtAmount)}</td>
                         <td className="p-3 text-base sm:text-sm">
                           <button
                             onClick={() => handleDeleteInvoice(invoice.invoiceCode)}
