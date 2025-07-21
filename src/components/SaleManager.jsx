@@ -345,7 +345,7 @@ function SaleManager() {
           </div>
         ) : (
           <>
-            <div className="sticky top-0  z-10 pt-1">
+            <div className="sticky top-0 bg-white z-10 w-full pt-2">
               <div className="flex flex-wrap gap-2 mb-4 overflow-x-auto">
                 {categories.map((category) => (
                   <button
